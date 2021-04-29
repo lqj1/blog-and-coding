@@ -3,6 +3,9 @@
 import Vue from "vue";
 import App from "./App";
 import router from "./router";
+import Swiper from "swiper";
+// import VueAwesomeSwiper from "vue-awesome-swiper";
+// import "swiper/swiper-bundle.css";
 import { Button, Row, Col, Swipe, SwipeItem, Lazyload } from "vant";
 
 // import "vant/lib/index.css";
