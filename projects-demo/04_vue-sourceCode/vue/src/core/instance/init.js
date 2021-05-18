@@ -125,10 +125,12 @@ export function initInternalComponent (vm: Component, options: InternalComponent
  * @returns 
  */
 export function resolveConstructorOptions (Ctor: Class<Component>) {
+  // 从实例构造函数上获取选项
   let options = Ctor.options
   if (Ctor.super) {
     // 存在基类，递归解析基类构造函数的选项
     const superOptions = resolveConstructorOptions(Ctor.super)
+    // 缓存
     const cachedSuperOptions = Ctor.superOptions
     if (superOptions !== cachedSuperOptions) {
       // super option changed,

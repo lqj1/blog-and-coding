@@ -6946,23 +6946,31 @@ function registerDeepBindings (data) {
 /**
  * Runtime helper for rendering v-for lists.
  */
+/**
+ * Runtime helper for rendering v-for lists.
+ * 运行时渲染 v-for 列表的帮助函数，循环遍历 val 值，依次为每一项执行 render 方法生成 VNode，最终返回一个 VNode 数组
+ */
 function renderList (
   val,
   render
 ) {
   var ret, i, l, keys, key;
   if (Array.isArray(val) || typeof val === 'string') {
+    // val 为数组或者字符串
     ret = new Array(val.length);
     for (i = 0, l = val.length; i < l; i++) {
       ret[i] = render(val[i], i);
     }
   } else if (typeof val === 'number') {
+    // val 为一个数值，则遍历 0 - val 的所有数字
     ret = new Array(val);
     for (i = 0; i < val; i++) {
       ret[i] = render(i + 1, i);
     }
   } else if (isObject(val)) {
+    // val 为一个对象，遍历对象
     if (hasSymbol && val[Symbol.iterator]) {
+      // val 为一个可迭代对象
       ret = [];
       var iterator = val[Symbol.iterator]();
       var result = iterator.next();
@@ -6971,6 +6979,7 @@ function renderList (
         result = iterator.next();
       }
     } else {
+      // val 为一个普通对象
       keys = Object.keys(val);
       ret = new Array(keys.length);
       for (i = 0, l = keys.length; i < l; i++) {
@@ -6982,6 +6991,7 @@ function renderList (
   if (!isDef(ret)) {
     ret = [];
   }
+  // 返回 VNode 数组
   (ret)._isVList = true;
   return ret
 }
@@ -7125,23 +7135,35 @@ function bindObjectProps (
 /**
  * Runtime helper for rendering static trees.
  */
+/**
+ * Runtime helper for rendering static trees.
+ * 运行时负责生成静态树的 VNode 的帮助程序，完成了以下两件事
+ *   1、执行 staticRenderFns 数组中指定下标的渲染函数，生成静态树的 VNode 并缓存，下次在渲染时从缓存中直接读取（isInFor 必须为 true）
+ *   2、为静态树的 VNode 打静态标记
+ * @param { number} index 表示当前静态节点的渲染函数在 staticRenderFns 数组中的下标索引
+ * @param { boolean} isInFor 表示当前静态节点是否被包裹在含有 v-for 指令的节点内部
+ */
 function renderStatic (
   index,
   isInFor
 ) {
+  // 缓存，静态节点第二次被渲染时就从缓存中直接获取已缓存的 VNode
   var cached = this._staticTrees || (this._staticTrees = []);
   var tree = cached[index];
   // if has already-rendered static tree and not inside v-for,
   // we can reuse the same tree.
+  // 如果当前静态树已经被渲染过一次（即有缓存）而且没有被包裹在 v-for 指令所在节点的内部，则直接返回缓存的 VNode
   if (tree && !isInFor) {
     return tree
   }
+  // 执行 staticRenderFns 数组中指定元素（静态树的渲染函数）生成该静态树的 VNode，并缓存
   // otherwise, render a fresh tree.
   tree = cached[index] = this.$options.staticRenderFns[index].call(
     this._renderProxy,
     null,
     this // for render fns generated for functional component templates
   );
+  // 静态标记，为静态树的 VNode 打标记，即添加 { isStatic: true, key: `__static__${index}`, isOnce: false }
   markStatic(tree, ("__static__" + index), false);
   return tree
 }
@@ -7149,6 +7171,12 @@ function renderStatic (
 /**
  * Runtime helper for v-once.
  * Effectively it means marking the node as static with a unique key.
+ */
+/**
+ * Runtime helper for v-once.
+ * Effectively it means marking the node as static with a unique key.
+ * v-once 指令的运行时帮助程序，为 VNode 加上打上静态标记
+ * 有点多余，因为含有 v-once 指令的节点都被当作静态节点处理了，所以也不会走这儿
  */
 function markOnce (
   tree,
@@ -7158,13 +7186,17 @@ function markOnce (
   markStatic(tree, ("__once__" + index + (key ? ("_" + key) : "")), true);
   return tree
 }
-
+/**
+ * 为 VNode 打静态标记，在 VNode 上添加三个属性：
+ * { isStatick: true, key: xx, isOnce: true or false } 
+ */
 function markStatic (
   tree,
   key,
   isOnce
 ) {
   if (Array.isArray(tree)) {
+    // tree 为 VNode 数组，循环遍历其中的每个 VNode，为每个 VNode 做静态标记
     for (var i = 0; i < tree.length; i++) {
       if (tree[i] && typeof tree[i] !== 'string') {
         markStaticNode(tree[i], (key + "_" + i), isOnce);
@@ -7174,7 +7206,9 @@ function markStatic (
     markStaticNode(tree, key, isOnce);
   }
 }
-
+/**
+ * 标记静态 VNode
+ */
 function markStaticNode (node, key, isOnce) {
   node.isStatic = true;
   node.key = key;
@@ -7256,20 +7290,52 @@ function prependModifier (value, symbol) {
 }
 
 /*  */
-
+/**
+ * 在实例上挂载简写的渲染工具函数，这些都是运行时代码
+ * 这些工具函数在编译器生成的渲染函数中被使用到了
+ * @param {*} target Vue 实例
+ */
 function installRenderHelpers (target) {
+  /**
+   * v-once 指令的运行时帮助程序，为 VNode 加上打上静态标记
+   * 有点多余，因为含有 v-once 指令的节点都被当作静态节点处理了，所以也不会走这儿
+   */
   target._o = markOnce;
+  // 将值转换为数字
   target._n = toNumber;
+  /**
+   * 将值转换为字符串形式，普通值 => String(val)，对象 => JSON.stringify(val)
+   */
   target._s = toString;
+  /**
+   * 运行时渲染 v-for 列表的帮助函数，循环遍历 val 值，依次为每一项执行 render 方法生成 VNode，最终返回一个 VNode 数组
+   */
   target._l = renderList;
   target._t = renderSlot;
+  /**
+   * 判断两个值是否相等
+   */
   target._q = looseEqual;
+  /**
+   * 相当于 indexOf 方法
+   */
   target._i = looseIndexOf;
+  /**
+   * 运行时负责生成静态树的 VNode 的帮助程序，完成了以下两件事
+   *   1、执行 staticRenderFns 数组中指定下标的渲染函数，生成静态树的 VNode 并缓存，下次在渲染时从缓存中直接读取（isInFor 必须为 true）
+   *   2、为静态树的 VNode 打静态标记
+   */
   target._m = renderStatic;
   target._f = resolveFilter;
   target._k = checkKeyCodes;
   target._b = bindObjectProps;
+  /**
+   * 为文本节点创建 VNode
+   */
   target._v = createTextVNode;
+  /**
+   * 为空节点创建 VNode
+   */
   target._e = createEmptyVNode;
   target._u = resolveScopedSlots;
   target._g = bindObjectListeners;
