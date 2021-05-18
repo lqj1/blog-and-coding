@@ -42,6 +42,8 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.set = function proxySetter (val) {
     this[sourceKey][key] = val
   }
+  // target就是vm吗，访问 vm[key] 就是 vm[sourceKey][key]
+  // 如 vm.key 就是访问 vm._data.key
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
@@ -51,7 +53,7 @@ export function initState (vm: Component) {
   if (opts.props) initProps(vm, opts.props)
   if (opts.methods) initMethods(vm, opts.methods)
   if (opts.data) {
-    initData(vm)
+    initData(vm)   // 这里解释了为什么其他方法里面可以访问到 data 中的数据
   } else {
     observe(vm._data = {}, true /* asRootData */)
   }
@@ -111,7 +113,7 @@ function initProps (vm: Component, propsOptions: Object) {
 
 function initData (vm: Component) {
   let data = vm.$options.data
-  data = vm._data = typeof data === 'function'
+  data = vm._data = typeof data === 'function'   // 判断是不是 function，所以建议用 return {}
     ? getData(data, vm)
     : data || {}
   if (!isPlainObject(data)) {
@@ -137,6 +139,7 @@ function initData (vm: Component) {
         )
       }
     }
+    // 判断 props 和 data 中的属性不能重复，具有唯一性
     if (props && hasOwn(props, key)) {
       process.env.NODE_ENV !== 'production' && warn(
         `The data property "${key}" is already declared as a prop. ` +
@@ -144,6 +147,7 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
+      // 数据代理
       proxy(vm, `_data`, key)
     }
   }

@@ -35,6 +35,15 @@ export function initMixin (Vue: Class<Component>) {
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
+      /**
+       * var app =  new Vue({
+       *    el:'#app',
+       *    data: {
+       *      message: 'hello Vue'
+       *    }
+       * })
+       */
+      // 将传入的 options merge到 $options 上，包括 el,data 等
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -64,7 +73,7 @@ export function initMixin (Vue: Class<Component>) {
       mark(endTag)
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
-
+    // 判断 options 中有无 el 对象，将其绑定到 vm 实例上
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }

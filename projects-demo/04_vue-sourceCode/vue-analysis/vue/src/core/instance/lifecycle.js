@@ -137,7 +137,9 @@ export function mountComponent (
   hydrating?: boolean
 ): Component {
   vm.$el = el
+  // 判断有无render函数，Vue只认render函数
   if (!vm.$options.render) {
+    // 没有就将render定义为空的 vNode
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
       /* istanbul ignore if */
@@ -150,6 +152,7 @@ export function mountComponent (
           vm
         )
       } else {
+        // 需要有 template和render 函数
         warn(
           'Failed to mount component: template or render function not defined.',
           vm
