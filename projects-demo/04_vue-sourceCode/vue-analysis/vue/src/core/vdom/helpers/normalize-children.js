@@ -18,6 +18,7 @@ import { isFalse, isTrue, isDef, isUndef, isPrimitive } from 'shared/util'
 export function simpleNormalizeChildren (children: any) {
   for (let i = 0; i < children.length; i++) {
     if (Array.isArray(children[i])) {
+      // 将 childern 中的二维数组铺成一维数组
       return Array.prototype.concat.apply([], children)
     }
   }
@@ -30,8 +31,8 @@ export function simpleNormalizeChildren (children: any) {
 // is needed to cater to all possible types of children values.
 export function normalizeChildren (children: any): ?Array<VNode> {
   return isPrimitive(children)
-    ? [createTextVNode(children)]
-    : Array.isArray(children)
+    ? [createTextVNode(children)]    // 基础类型
+    : Array.isArray(children)        // Array类型
       ? normalizeArrayChildren(children)
       : undefined
 }

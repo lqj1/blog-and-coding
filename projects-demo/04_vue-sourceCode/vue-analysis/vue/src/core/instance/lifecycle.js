@@ -59,6 +59,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // based on the rendering backend used.
     if (!prevVnode) {
       // initial render
+      // 真实dom,生成的vdom
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
       // updates
@@ -183,6 +184,7 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
+      // 通过 vm._render渲染出 vnode
       vm._update(vm._render(), hydrating)
     }
   }

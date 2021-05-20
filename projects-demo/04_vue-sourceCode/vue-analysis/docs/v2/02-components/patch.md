@@ -86,7 +86,7 @@ init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
 },
 ```
 
-`init` 钩子函数执行也很简单，我们先不考虑 `keepAlive` 的情况，它是通过 `createComponentInstanceForVnode` 创建一个 Vue 的实例，然后调用 `$mount` 方法挂载子组件，
+`init` 钩子函数执行也很简单，我们先不考虑 `keepAlive` 的情况，**它是通过 `createComponentInstanceForVnode` 创建一个 Vue 的实例**，然后调用 `$mount` 方法挂载子组件，
 先来看一下 `createComponentInstanceForVnode` 的实现：
 
 ```js
@@ -381,4 +381,4 @@ function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
 
 
  
- 
+

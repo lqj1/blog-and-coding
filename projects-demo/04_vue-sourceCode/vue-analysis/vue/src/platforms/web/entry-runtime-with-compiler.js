@@ -16,7 +16,9 @@ const idToTemplate = cached(id => {
 });
 
 const mount = Vue.prototype.$mount;
+// 调用 vm.$mount 的时候就是调用这里的函数
 Vue.prototype.$mount = function (el?: string | Element, hydrating?: boolean): Component {
+  // 将 el 转换为 dom 对象
   el = el && query(el);
   /* istanbul ignore if */
   // Vue不能直接挂在到 body 或者 html 上，因为会覆盖

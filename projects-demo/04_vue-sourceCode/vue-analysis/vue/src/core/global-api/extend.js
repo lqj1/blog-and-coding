@@ -52,6 +52,7 @@ export function initExtend (Vue: GlobalAPI) {
       initComputed(Sub)
     }
 
+    // 全局静态方法赋值给 Sub
     // allow further extension/mixin/plugin usage
     Sub.extend = Super.extend
     Sub.mixin = Super.mixin
@@ -75,6 +76,7 @@ export function initExtend (Vue: GlobalAPI) {
     Sub.sealedOptions = extend({}, Sub.options)
 
     // cache constructor
+    // 对创建的对象做一层缓存
     cachedCtors[SuperId] = Sub
     return Sub
   }

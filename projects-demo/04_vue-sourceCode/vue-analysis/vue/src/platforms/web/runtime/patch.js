@@ -9,4 +9,5 @@ import platformModules from 'web/runtime/modules/index'
 // built-in modules have been applied.
 const modules = platformModules.concat(baseModules)
 
+// 科里化技术，解决不同平台patch的处理，使其统一
 export const patch: Function = createPatchFunction({ nodeOps, modules })

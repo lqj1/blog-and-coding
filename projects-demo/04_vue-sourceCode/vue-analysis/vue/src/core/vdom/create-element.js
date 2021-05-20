@@ -87,7 +87,9 @@ export function _createElement (
     data.scopedSlots = { default: children[0] }
     children.length = 0
   }
+  // normalize主要是将 children 变成一维数组的格式
   if (normalizationType === ALWAYS_NORMALIZE) {
+    // render 的每个参数应该是数组，且childern应该是 VNode
     children = normalizeChildren(children)
   } else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children)
@@ -96,6 +98,7 @@ export function _createElement (
   if (typeof tag === 'string') {
     let Ctor
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
+    // 判断 tag 是否是平台保留节点，如div
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       vnode = new VNode(
@@ -116,6 +119,7 @@ export function _createElement (
     }
   } else {
     // direct component options / constructor
+    // 当传入的元素是组件的时候
     vnode = createComponent(tag, data, context, children)
   }
   if (Array.isArray(vnode)) {
