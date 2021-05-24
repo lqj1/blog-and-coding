@@ -362,6 +362,7 @@ function assertObjectType (name: string, value: any, vm: ?Component) {
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
  */
+// 将child和parents合并
 export function mergeOptions (
   parent: Object,
   child: Object,
@@ -379,9 +380,11 @@ export function mergeOptions (
   normalizeInject(child, vm)
   normalizeDirectives(child)
   const extendsFrom = child.extends
+  // 如果有有定义extends，就递归调用合并
   if (extendsFrom) {
     parent = mergeOptions(parent, extendsFrom, vm)
   }
+  // extend 和 mixins的优先级是一样的
   if (child.mixins) {
     for (let i = 0, l = child.mixins.length; i < l; i++) {
       parent = mergeOptions(parent, child.mixins[i], vm)
