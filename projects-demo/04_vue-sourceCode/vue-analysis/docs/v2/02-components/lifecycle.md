@@ -255,7 +255,7 @@ export default class Watcher {
 ## beforeDestroy & destroyed
 
 顾名思义，`beforeDestroy` 和 `destroyed` 钩子函数的执行时机在组件销毁的阶段，组件的销毁过程之后会详细介绍，最终会调用 `$destroy` 方法，它的定义在 `src/core/instance/lifecycle.js` 中：
- 
+
 ```js
 Vue.prototype.$destroy = function () {
     const vm: Component = this
@@ -312,3 +312,4 @@ Vue.prototype.$destroy = function () {
 
 这一节主要介绍了 Vue 生命周期中各个钩子函数的执行时机以及顺序，通过分析，我们知道了如在 `created` 钩子函数中可以访问到数据，在 `mounted` 钩子函数中可以访问到 DOM，在 `destroy` 钩子函数中可以做一些定时器销毁工作，了解它们有利于我们在合适的生命周期去做不同的事情。
 
+ 
