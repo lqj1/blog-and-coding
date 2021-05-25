@@ -8,6 +8,8 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "amfe-flexible": "^2.2.1",
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
@@ -32,7 +34,8 @@
     "lint-staged": "^9.5.0",
     "postcss": "^8.3.0",
     "postcss-loader": "^5.3.0",
-    "postcss-pxtorem": "^6.0.0",
+    "postcss-pxtorem": "^5.1.1",
+    "vant": "^2.12.20",
     "vue-template-compiler": "^2.6.11"
   },
   "gitHooks": {
