@@ -13,3 +13,13 @@ export const login = data => {
     data
   })
 }
+/**
+ * 发送短信验证码
+ */
+// 直接将data作为参数对象传入
+export const sendMsg = mobile => {
+  return request({
+    method: 'GET',
+    url: `/app/v1_0/sms/codes/${mobile}`
+  })
+}

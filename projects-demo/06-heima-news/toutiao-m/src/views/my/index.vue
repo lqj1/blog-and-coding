@@ -47,6 +47,10 @@
         </van-grid-item>
       </van-grid>
     </van-cell-group>
+    <van-grid :column-num="2">
+      <van-grid-item icon="photo-o" text="文字" />
+      <van-grid-item icon-prefix="icon" icon="dianzan" text="文字" />
+    </van-grid>
   </div>
 </template>
 
