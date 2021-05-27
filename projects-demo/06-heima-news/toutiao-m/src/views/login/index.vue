@@ -10,47 +10,17 @@
         提示：【只有表单验证通过，它才会调用submit】
       3. 使用 Field 的 rules 属性定义校验规则
     -->
-    <van-form
-      :show-error="false"
-      :show-error-message="false"
-      validate-first
-      ref="login-form"
-      @submit="onLogin"
-      @failed="onFailed"
-    >
-      <van-field
-        v-model="user.mobile"
-        icon-prefix="icon"
-        left-icon="shouji"
-        center
-        placeholder="请输入手机号"
-        name="mobile"
-        :rules="formRules.mobile"
-      />
-      <van-field
-        v-model="user.code"
-        icon-prefix="icon"
-        left-icon="yanzhengma"
-        center
-        placeholder="请输入验证码"
-        name="code"
-        :rules="formRules.code"
-      >
+    <van-form :show-error="false" :show-error-message="false" validate-first ref="login-form" @submit="onLogin" @failed="onFailed">
+      <van-field v-model="user.mobile" icon-prefix="icon" left-icon="shouji" center placeholder="请输入手机号" name="mobile" :rules="formRules.mobile" />
+      <van-field v-model="user.code" icon-prefix="icon" left-icon="yanzhengma" center placeholder="请输入验证码" name="code" :rules="formRules.code">
         <template #button>
           <van-count-down v-if="isCountDownShow" :time="1000 * 60" format="ss s" @finish="isCountDownShow = false"></van-count-down>
-          <van-button
-            v-else
-            class="send-btn"
-            size="small"
-            round
-            :loading="isSendSmsLoading"
-            @click.prevent="onSendMsg"
-          >发送验证码</van-button>
+          <van-button v-else class="send-btn" size="small" round :loading="isSendSmsLoading" @click.prevent="onSendMsg">发送验证码</van-button>
         </template>
       </van-field>
       <div class="login-btn-wrap">
-      <van-button class="login-btn" type="info" block>登录</van-button>
-    </div>
+        <van-button class="login-btn" type="info" block>登录</van-button>
+      </div>
     </van-form>
     <!-- 登录表单 -->
   </div>
