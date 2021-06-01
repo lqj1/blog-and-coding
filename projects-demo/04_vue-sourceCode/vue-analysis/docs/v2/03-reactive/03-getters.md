@@ -47,7 +47,7 @@ export function defineReactive (
   })
 }
 ```
-这段代码我们只需要关注 2 个地方，一个是 `const dep = new Dep()` 实例化一个 `Dep` 的实例，另一个是在 `get` 函数中通过 `dep.depend` 做依赖收集，这里还有个对 `childOb` 判断的逻辑，我们之后会介绍它的作用。
+这段代码我们只需要关注 2 个地方，一个是 `const dep = new Dep()` 实例化一个 `Dep` 的实例，另一个是在 `get` 函数中**通过 `dep.depend` 做依赖收集**，这里还有个对 `childOb` 判断的逻辑，我们之后会介绍它的作用。
 
 ## Dep
 
@@ -305,7 +305,7 @@ pushTarget(this)
 ```
 
 `pushTarget` 的定义在 `src/core/observer/dep.js` 中：
- 
+
 ```js
 export function pushTarget (_target: Watcher) {
   if (Dep.target) targetStack.push(Dep.target)
@@ -319,6 +319,7 @@ value = this.getter.call(vm, vm)
 ```
 
 `this.getter` 对应就是 `updateComponent` 函数，这实际上就是在执行：
+
 ```js
 vm._update(vm._render(), hydrating)
 ```
@@ -390,11 +391,11 @@ cleanupDeps () {
 }
 ```
 
-考虑到 Vue 是数据驱动的，所以每次数据变化都会重新 render，那么 `vm._render()` 方法又会再次执行，并再次触发数据的 getters，所以 `Watcher` 在构造函数中会初始化 2 个 `Dep` 实例数组，`newDeps` 表示新添加的 `Dep` 实例数组，而 `deps` 表示上一次添加的 `Dep` 实例数组。
+考虑到 Vue 是数据驱动的，所以**每次数据变化都会重新 render**，那么 `vm._render()` 方法又会再次执行，并再次触发数据的 getters，所以 `Watcher` 在构造函数中会初始化 2 个 `Dep` 实例数组，`newDeps` 表示新添加的 `Dep` 实例数组，而 `deps` 表示上一次添加的 `Dep` 实例数组。
 
 在执行 `cleanupDeps` 函数的时候，会首先遍历 `deps`，移除对 `dep.subs` 数组中 `Wathcer` 的订阅，然后把 `newDepIds` 和 `depIds` 交换，`newDeps` 和 `deps` 交换，并把 `newDepIds` 和 `newDeps` 清空。
 
-那么为什么需要做 `deps` 订阅的移除呢，在添加 `deps` 的订阅过程，已经能通过 `id` 去重避免重复订阅了。
+**那么为什么需要做 `deps` 订阅的移除呢，在添加 `deps` 的订阅过程，已经能通过 `id` 去重避免重复订阅了。**
 
 考虑到一种场景，我们的模板会根据 `v-if` 去渲染不同子模板 a 和 b，当我们满足某种条件的时候渲染 a 的时候，会访问到 a 中的数据，这时候我们对 a 使用的数据添加了 getter，做了依赖收集，那么当我们去修改 a 的数据的时候，理应通知到这些订阅者。那么如果我们一旦改变了条件渲染了 b 模板，又会对 b 使用的数据添加了 getter，如果我们没有依赖移除的过程，那么这时候我去修改 a 模板的数据，会通知 a 数据的订阅的回调，这显然是有浪费的。
 
@@ -402,4 +403,9 @@ cleanupDeps () {
 
 ## 总结
 
-通过这一节的分析，我们对 Vue 数据的依赖收集过程已经有了认识，并且对这其中的一些细节做了分析。收集依赖的目的是为了当这些响应式数据发生变化，触发它们的 setter 的时候，能知道应该通知哪些订阅者去做相应的逻辑处理，我们把这个过程叫派发更新，其实 `Watcher` 和 `Dep` 就是一个非常经典的观察者设计模式的实现，下一节我们来详细分析一下派发更新的过程。
+通过这一节的分析，我们对 Vue 数据的依赖收集过程已经有了认识，并且对这其中的一些细节做了分析。收集依赖的目的是为了当这些响应式数据发生变化，触发它们的 setter 的时候，**能知道应该通知哪些订阅者去做相应的逻辑处理，我们把这个过程叫派发更新**，其实 `Watcher` 和 `Dep` 就是一个非常经典的观察者设计模式的实现，下一节我们来详细分析一下派发更新的过程。
+
+依赖收集就是订阅数据变化的watcher的收集。
+
+依赖收集的目的是为了当这些响应式数据发送变化，触发它们的setter的时候，能知道应该通知哪些订阅者去做相应的逻辑处理。
+

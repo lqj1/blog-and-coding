@@ -31,7 +31,7 @@ for (macroTask of macroTaskQueue) {
     }
 }
 ```
-在浏览器环境中，常见的 macro task 有 setTimeout、MessageChannel、postMessage、setImmediate；常见的 micro task 有 MutationObsever 和 Promise.then。
+在浏览器环境中，常见的 （宏任务）macro task 有 setTimeout、MessageChannel、postMessage、setImmediate；常见的 micro task（微任务） 有 MutationObsever 和 Promise.then。
 
 ## Vue 的实现
 
@@ -160,6 +160,7 @@ export function nextTick (cb?: Function, ctx?: Object) {
 这里使用 `callbacks` 而不是直接在 `nextTick` 中执行回调函数的原因是保证在同一个 tick 内多次执行 `nextTick`，不会开启多个异步任务，而把这些异步任务都压成一个同步任务，在下一个 tick 执行完毕。
 
 `nextTick` 函数最后还有一段逻辑：
+
 ```js
  if (!cb && typeof Promise !== 'undefined') {
   return new Promise(resolve => {
@@ -173,11 +174,11 @@ nextTick().then(() => {})
 ```
 当 `_resolve` 函数执行，就会跳到 `then` 的逻辑中。
 
-`next-tick.js` 还对外暴露了 `withMacroTask` 函数，它是对函数做一层包装，确保函数执行过程中对数据任意的修改，触发变化执行 `nextTick` 的时候强制走 `macroTimerFunc`。比如对于一些 DOM 交互事件，如 `v-on` 绑定的事件回调函数的处理，会强制走 macro task。
+`next-tick.js` 还**对外暴露了 `withMacroTask` 函数**，它是对函数做一层包装，确保函数执行过程中对数据任意的修改，触发变化执行 `nextTick` 的时候强制走 `macroTimerFunc`。比如对于一些 DOM 交互事件，如 `v-on` 绑定的事件回调函数的处理，会强制走 macro task。
 
 ## 总结
 
-通过这一节对 `nextTick` 的分析，并结合上一节的 setter 分析，我们了解到数据的变化到 DOM 的重新渲染是一个异步过程，发生在下一个 tick。这就是我们平时在开发的过程中，比如从服务端接口去获取数据的时候，数据做了修改，如果我们的某些方法去依赖了数据修改后的 DOM 变化，我们就必须在 `nextTick` 后执行。比如下面的伪代码：
+通过这一节对 `nextTick` 的分析，并结合上一节的 setter 分析，我们了解到**数据的变化到 DOM 的重新渲染是一个异步过程**，发生在下一个 tick。这就是我们平时在开发的过程中，比如从服务端接口去获取数据的时候，数据做了修改，如果我们的某些方法去依赖了数据修改后的 DOM 变化，我们就必须在 `nextTick` 后执行。比如下面的伪代码：
 
 ```js
 getData(res).then(()=>{
@@ -190,4 +191,7 @@ getData(res).then(()=>{
 
 Vue.js 提供了 2 种调用 `nextTick` 的方式，一种是全局 API `Vue.nextTick`，一种是实例上的方法 `vm.$nextTick`，无论我们使用哪一种，最后都是调用 `next-tick.js` 中实现的 `nextTick` 方法。
 
+nextTick是把要执行的任务推入到一个队列中，在下一个tick中同步执行。
+
+数据改变后触发渲染watcher的update，但是watchers的flush是在nextTick后，所以重新渲染是异步的。
 

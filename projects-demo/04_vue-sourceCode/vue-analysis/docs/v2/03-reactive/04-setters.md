@@ -60,7 +60,7 @@ setter 的逻辑有 2 个关键的点，一个是 `childOb = !shallow && observe
 
 ## 过程分析
 
-当我们在组件中对响应的数据做了修改，就会触发 setter 的逻辑，最后调用 `dep.notify()` 方法，
+当我们在组件中对响应的数据做了修改，就会触发 setter 的逻辑，最后**调用 `dep.notify()` 方法**，
 它是 `Dep` 的一个实例方法，定义在 `src/core/observer/dep.js` 中：
 
 ```js
@@ -146,7 +146,7 @@ export function queueWatcher (watcher: Watcher) {
 }
 ```
 
-这里引入了一个队列的概念，这也是 Vue 在做派发更新的时候的一个优化的点，它并不会每次数据改变都触发 `watcher` 的回调，而是把这些 `watcher` 先添加到一个队列里，然后在 `nextTick` 后执行 `flushSchedulerQueue`。
+这里引入了一个队列的概念，**这也是 Vue 在做派发更新的时候的一个优化的点，它并不会每次数据改变都触发 `watcher` 的回调，而是把这些 `watcher` 先添加到一个队列里，然后在 `nextTick` 后执行 `flushSchedulerQueue`**。
 
 这里有几个细节要注意一下，首先用 `has` 对象保证同一个 `Watcher` 只添加一次；接着对 `flushing` 的判断，else 部分的逻辑稍后我会讲；最后通过 `waiting` 保证对 `nextTick(flushSchedulerQueue)` 的调用逻辑只有一次，另外 `nextTick` 的实现我之后会抽一小节专门去讲，目前就可以理解它是在下一个 tick，也就是异步的去执行 `flushSchedulerQueue`。
 
@@ -336,4 +336,8 @@ updateComponent = () => {
 
 ## 总结
 
-通过这一节的分析，我们对 Vue 数据修改派发更新的过程也有了认识，实际上就是当数据发生变化的时候，触发 setter 逻辑，把在依赖过程中订阅的的所有观察者，也就是 `watcher`，都触发它们的 `update` 过程，这个过程又利用了队列做了进一步优化，在 `nextTick` 后执行所有 `watcher` 的 `run`，最后执行它们的回调函数。`nextTick` 是 Vue 一个比较核心的实现了，下一节我们来重点分析它的实现。
+通过这一节的分析，我们对 Vue 数据修改派发更新的过程也有了认识，实际上就是当数据发生变化的时候，触发 setter 逻辑，**把在依赖过程中订阅的的所有观察者，也就是 `watcher`，都触发它们的 `update` 过程，这个过程又利用了队列做了进一步优化，在 `nextTick` 后执行所有 `watcher` 的 `run`，最后执行它们的回调函数**。`nextTick` 是 Vue 一个比较核心的实现了，下一节我们来重点分析它的实现。
+
+派发更新就是当数据发生改变后，通知所有订阅了这个数据变化的watcher执行update。
+
+派发更新的过程中会把所有要执行update的watche推入到队列中，在nextTick后执行flush。
