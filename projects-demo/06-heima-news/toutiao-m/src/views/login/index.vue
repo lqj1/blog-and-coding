@@ -66,6 +66,9 @@ export default {
         this.$toast.success('登陆成功')
         // 将后端返回的用户登陆状态（token)放到vuex中
         this.$store.commit('setUser', data.data)
+
+        // 登陆成功，跳转回原来页面，这种方式并不好
+        this.$router.back()
       } catch (err) {
         console.log(err)
         this.$toast.fail('登陆失败')
