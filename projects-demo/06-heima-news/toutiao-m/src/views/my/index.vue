@@ -16,7 +16,7 @@
         </van-grid-item>
         <van-grid-item class="data-info-item">
           <span class="text-wrap" slot="text">
-            <div class="count">{{ currentUser.follow_count }}}</div>
+            <div class="count">{{ currentUser.follow_count }}</div>
             <div class="text">关注</div>
           </span>
         </van-grid-item>
