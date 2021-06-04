@@ -54,7 +54,7 @@ function normalizeProps (options: Object, vm: ?Component) {
 
 合并配置我们在组件化章节讲过，它主要就是处理我们定义组件的对象 `option`，然后挂载到组件的实例 `this.$options` 中。
 
-我们接下来重点看 `normalizeProps` 的实现，其实这个函数的主要目的就是把我们编写的 `props` 转成对象格式，因为实际上 `props` 除了对象格式，还允许写成数组格式。
+我们接下来重点看 `normalizeProps` 的实现，其实**这个函数的主要目的就是把我们编写的 `props` 转成对象格式，因为实际上 `props` 除了对象格式，还允许写成数组格式**。
 
 当 `props` 是一个数组，每一个数组元素 `prop` 只能是一个 `string`，表示 `prop` 的 `key`，转成驼峰格式，`prop` 的类型为空。
 
@@ -161,9 +161,9 @@ function initProps (vm: Component, propsOptions: Object) {
   }
   toggleObserving(true)
 }
-``` 
+```
 
-`initProps` 主要做 3 件事情：校验、响应式和代理。
+**`initProps` 主要做 3 件事情：校验、响应式和代理**。
 
 ### 校验
 
@@ -364,7 +364,7 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
 
 检测如果 `prop` 没有定义 `default` 属性，那么返回 `undefined`，通过这块逻辑我们知道除了 `Boolean` 类型的数据，其余没有设置 `default` 属性的 `prop` 默认值都是 `undefined`。
 
-接着是开发环境下对 `prop` 的默认值是否为对象或者数组类型的判断，如果是的话会报警告，因为对象和数组类型的 `prop`，他们的默认值必须要返回一个工厂函数。
+接着是开发环境下对 `prop` 的默认值是否为对象或者数组类型的判断，如果是的话会报警告，因为对象和数组类型的 `prop`，他们的默认值必须要返回一个工厂 函数。
 
 接下来的判断是如果上一次组件渲染父组件传递的 `prop` 的值是 `undefined`，则直接返回 上一次的默认值 `vm._props[key]`，这样可以避免触发不必要的 `watcher` 的更新。
 
@@ -700,7 +700,7 @@ export function updateChildComponent (
 再来看一下当对象类型的 `prop` 的内部属性发生变化的时候，这个时候其实并没有触发子组件 `prop` 的更新。但是在子组件的渲染过程中，访问过这个对象 `prop`，所以这个对象 `prop` 在触发 `getter` 的时候会把子组件的 `render watcher` 收集到依赖中，然后当我们在父组件更新这个对象 `prop` 的某个属性的时候，会触发 `setter` 过程，也就会通知子组件 `render watcher` 的 `update`，进而触发子组件的重新渲染。
 
 以上就是当父组件 `props` 更新，触发子组件重新渲染的 2 种情况。
- 
+
 ## toggleObserving
 
 最后我们在来聊一下 `toggleObserving`，它的定义在 `src/core/observer/index.js` 中：
@@ -765,7 +765,7 @@ export function defineReactive (
 通常对于值 `val` 会执行 `observe` 函数，然后遇到 `val` 是对象或者数组的情况会递归执行 `defineReactive` 把它们的子属性都变成响应式的，但是由于 `shouldObserve` 的值变成了 `false`，这个递归过程被省略了。为什么会这样呢？
 
 因为正如我们前面分析的，对于对象的 `prop` 值，子组件的 `prop` 值始终指向父组件的 `prop` 值，只要父组件的 `prop` 值变化，就会触发子组件的重新渲染，所以这个 `observe` 过程是可以省略的。
- 
+
 最后再执行 `toggleObserving(true)` 恢复 `shouldObserve` 为 `true`。
 
 在 `validateProp` 的过程中：
