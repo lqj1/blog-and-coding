@@ -6,6 +6,7 @@ import store from './store'
 import Vant from 'vant'
 // 加载 vant 组件库样式
 import 'vant/lib/index.css'
+import './utils/dayjs'
 
 // 自动设置 REM 基准值 (html标签字体大小)
 import 'amfe-flexible'
