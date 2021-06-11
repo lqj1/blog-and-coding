@@ -7,7 +7,9 @@
     </van-cell>
     <van-grid :gutter="10">
       <!-- :class="{ active: index === 激活的频道 }" -->
-      <van-grid-item class="grid-item" :class="{ active: index === active }" :icon="(isEdit && index !== 0) ? 'clear' : ''" v-for="(channel,index) in userChannels" :key="index" :text="channel.name" @click="onUserChannelClick(index)">
+      <van-grid-item class="grid-item" :class="{ active: index === active }"
+        :icon="(isEdit && index !== 0) ? 'clear' : ''" v-for="(channel,index) in userChannels" :key="index"
+        :text="channel.name" @click="onUserChannelClick(channel, index)">
       </van-grid-item>
     </van-grid>
     <!-- 频道推荐 -->
@@ -15,13 +17,16 @@
       <div slot="title" class="channel-title">频道推荐</div>
     </van-cell>
     <van-grid :gutter="10">
-      <van-grid-item class="grid-item" v-for="(channel,index) in recommendChannels" :key="index" :text="channel.name" @click="onAdd(channel)"></van-grid-item>
+      <van-grid-item class="grid-item" v-for="(channel,index) in recommendChannels" :key="index" :text="channel.name"
+        @click="onAdd(channel)"></van-grid-item>
     </van-grid>
   </div>
 </template>
 
 <script>
-import { getAllChannels } from '@/api/channel'
+import { getAllChannels, addUserChannel, deleteUserChannel } from '@/api/channel'
+import { mapState } from 'vuex'
+import { setItem } from '@/utils/storage'
 export default {
   name: 'ChannelEdit',
   props: {
@@ -41,6 +46,8 @@ export default {
     }
   },
   computed: {
+    // !!! 将 vuex 中的 user 映射到当前 data 中
+    ...mapState(['user']),
     // 推荐频道列表
     // 计算属性会观测内部依赖属性的变化而重新求值
     recommendChannels () {
@@ -64,21 +71,32 @@ export default {
       const { data } = await getAllChannels()
       this.allChannels = data.data.channels
     },
-    onAdd (channel) {
+    async onAdd (channel) {
       // 只需要向用户频道添加，推荐的频道会根据 computed 中的函数自动移除
       this.userChannels.push(channel)
       // TODO: 数据持久化
+      if (this.user) {
+        // 如果登陆了，数据存储到线上
+        await addUserChannel({
+          channels: [
+            { id: channel.id, seq: this.userChannels.length }
+          ]
+        })
+      } else {
+        // 如果没有登陆，数据存储到本地
+        setItem('user-channels', this.userChannels)
+      }
     },
-    onUserChannelClick (index) {
+    onUserChannelClick (channel, index) {
       if (this.isEdit && index !== 0) {
         // 编辑状态，删除频道
-        this.deleteChannel(index)
+        this.deleteChannel(channel, index)
       } else {
         // 非编辑状态，切换频道
         this.switchChannel(index)
       }
     },
-    deleteChannel (index) {
+    async deleteChannel (channel, index) {
       // 如果删除的是当前激活频道之前的频道
       if (index <= this.active) {
         // 更新激活频道的索引
@@ -86,6 +104,13 @@ export default {
       }
       this.userChannels.splice(index, 1)
       // 数据持久化
+      if (this.user) {
+        // 如果是登陆了，持久化到线上
+        await deleteUserChannel(channel.id)
+      } else {
+        // 没有登陆，持久化到本地
+        setItem('user-channels', this.userChannels)
+      }
     },
     switchChannel (index) {
       this.$emit('update-active', index)
