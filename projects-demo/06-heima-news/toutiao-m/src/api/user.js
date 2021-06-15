@@ -18,7 +18,6 @@ export const login = data => {
 /**
  * 发送短信验证码
  */
-// 直接将data作为参数对象传入
 export const sendMsg = mobile => {
   return request({
     method: 'GET',
@@ -28,7 +27,6 @@ export const sendMsg = mobile => {
 /**
  * 获取登陆用户信息
  */
-// 直接将data作为参数对象传入
 export const getCurrentUser = () => {
   return request({
     method: 'GET',
@@ -41,7 +39,6 @@ export const getCurrentUser = () => {
 /**
  * 获取用户频道列表
  */
-// 直接将data作为参数对象传入
 export const getUserChannels = () => {
   return request({
     method: 'GET',

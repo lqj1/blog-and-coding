@@ -23,7 +23,8 @@
     <van-popup v-model="isChannelEditShow" position="bottom" class="channel-edit-popup" closeable
       close-icon-position="top-left" get-container="body" style="height: 100%">
       <!-- 模板中的 $event 表示事件参数 -->
-      <channel-edit :user-channels="channels" :active="active" @close="isChannelEditShow = false" @update-active="active = $event" />
+      <channel-edit :user-channels="channels" :active="active" @close="isChannelEditShow = false"
+        @update-active="active = $event" />
     </van-popup>
   </div>
 </template>
@@ -32,6 +33,8 @@
 import { getUserChannels } from '@/api/user'
 import ArticleList from './components/article-list'
 import ChannelEdit from './components/channel-edit'
+import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage'
 
 export default {
   name: 'HomeIndex',
@@ -43,18 +46,38 @@ export default {
     return {
       active: 2, // 控制被激活的标签
       channels: [], // 频道列表
-      isChannelEditShow: true // 控制编辑频道的显示
+      isChannelEditShow: false // 控制编辑频道的显示
     }
+  },
+  computed: {
+    ...mapState(['user'])
   },
   created () {
     this.loadChannels()
   },
   methods: {
     async loadChannels () {
-      // 请求获取频道数据
-      const { data } = await getUserChannels()
-      // console.log(data)
-      this.channels = data.data.channels
+      let channels = []
+      if (this.user) {
+        // 已登录，请求获取线上的用户频道
+        // 请求获取频道数据
+        const { data } = await getUserChannels()
+        channels = data.data.channels
+      } else {
+        // 没有登录，判断是否有本地存储的频道列表数据
+        const localChannels = getItem('user-channels')
+        // 如果有本地存储的频道列表则使用
+        if (localChannels) {
+          channels = localChannels
+        } else {
+          // 用户没有登录，也没有本地存储的频道列表，那就请求获取默认推荐的频道列表
+          // 这里请求的时候，没有携带token，后端可以识别并返回相应的数据
+          const { data } = await getUserChannels()
+          channels = data.data.channels
+        }
+      }
+      // 处理完之后把数据放到 data 中的变量
+      this.channels = channels
     }
     // onUpdateActive (index) {
     //   this.active = index
