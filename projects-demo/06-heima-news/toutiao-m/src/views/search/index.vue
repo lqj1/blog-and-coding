@@ -1,13 +1,60 @@
 <template>
-  <div class="search-container">文章搜索</div>
+  <div class="search-container">
+    <!-- 搜索栏 -->
+    <!-- 在 van-search 外层添加form标签，且action不为空，即可在ios输入法中显示搜索按钮 -->
+    <form action="/">
+      <van-search
+        v-model="searchText"
+        placeholder="请输入搜索关键词"
+        show-action
+        @search="onSearch"
+        @cancel="$router.back()"
+        @focus="isResultShow = false"
+      />
+    </form>
+    <!-- 搜索栏 -->
+    <!-- 搜索结果 -->
+    <search-result v-if="isResultShow"></search-result>
+    <!-- 搜索结果 -->
+    <!-- 联想建议 -->
+    <!-- 判断搜索框是否有内容，如果有就启动联想建议 -->
+    <search-suggestion v-else-if="searchText" :search-text="searchText"></search-suggestion>
+    <!-- 联想建议 -->
+    <!-- 历史记录 -->
+    <search-history v-else></search-history>
+    <!-- 历史记录 -->
+  </div>
 </template>
 
 <script>
+import SearchSuggestion from './components/search-suggestion.vue'
+import SearchHistory from './components/search-history.vue'
+import SearchResult from './components/search-result.vue'
 export default {
-  name: 'SearchIndex'
+  name: 'SearchIndex',
+  components: {
+    SearchSuggestion,
+    SearchHistory,
+    SearchResult
+  },
+  data () {
+    return {
+      searchText: '', // 搜索输入框的内容
+      isResultShow: false // 控制搜索结果的显示
+    }
+  },
+  methods: {
+    onSearch () {
+      console.log('search')
+      this.isResultShow = true
+    },
+    onCancel () {
+      console.log('cancel')
+    }
+  }
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 
 </style>

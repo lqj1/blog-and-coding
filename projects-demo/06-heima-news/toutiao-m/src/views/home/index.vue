@@ -2,7 +2,8 @@
   <div class="home-container">
     <!-- 导航栏 -->
     <van-nav-bar class="app-nav-bar">
-      <van-button slot="title" class="search-btn" icon="search" type="info" round size="small">搜索</van-button>
+      <van-button slot="title" class="search-btn" icon="search" type="info" round size="small" to="/search">搜索
+      </van-button>
     </van-nav-bar>
     <!-- 导航栏 -->
     <!-- 文章频道列表 -->
