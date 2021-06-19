@@ -17,7 +17,6 @@
     <!-- 默认插槽的名字叫 default，可以省略-->
     <!-- <div slot="default"></div> -->
     <van-image v-if="article.cover.type === 1" class="right-cover" fit="cover" :src="article.cover.images[0]">
-
     </van-image>
   </van-cell>
 </template>
