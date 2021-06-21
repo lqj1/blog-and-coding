@@ -18,7 +18,7 @@ const request = axios.create({
       // 如果转换成功，则直接把结果返回
       return JSONbig.parse(data)
     } catch (err) {
-      console.log('转换失败', err)
+      // console.log('转换失败', err)
       return data
     }
     // axios 默认在内部使用 JSON.parse 来转换处理原始数据
