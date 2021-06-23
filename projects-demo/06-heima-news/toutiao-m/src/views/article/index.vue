@@ -26,33 +26,57 @@
       <div class="content markdown-body" v-html="article.content" ref="article-content">
       </div>
       <!-- 文章评论列表 -->
-      <comment-list :source="articleId"></comment-list>
+      <comment-list :source="articleId" :list="commentList" @update-total-count="totalCommentCount = $event" @reply-click="onReplyClick"></comment-list>
       <!-- /文章评论列表 -->
     </div>
     <!-- /正文部分 -->
     <!-- 底部区域 -->
     <div class="article-bottom">
-      <div class="art-bot-wrap">
-        <van-button class="comment-btn" type="default" round size="small" >写评论
-        </van-button>
-        <van-icon name="comment-o" info="123" color="#777" />
-        <van-icon
-          :color="article.is_collected? 'orange' : '#777'"
-          :name="article.is_collected? 'star' : 'star-o'"
-          @click="onCollect"
-        />
-        <van-icon
-          :name="article.attitude === 1 ? 'good-job' : 'good-job-o'"
-          :color="article.attitude === 1 ? 'hotpink' : '#777'"
-          @click="onLike"
-        />
-        <van-icon name="share" color="#777" />
-      </div>
+      <van-button
+        class="comment-btn"
+        type="default"
+        round
+        size="small"
+        @click="isPostShow = true"
+      >写评论</van-button>
+      <van-icon
+        name="comment-o"
+        :info="totalCommentCount"
+        color="#777"
+      />
+      <van-icon
+        :color="article.is_collected? 'orange' : '#777'"
+        :name="article.is_collected? 'star' : 'star-o'"
+        @click="onCollect"
+      />
+      <van-icon
+        :name="article.attitude === 1 ? 'good-job' : 'good-job-o'"
+        :color="article.attitude === 1 ? 'hotpink' : '#777'"
+        @click="onLike"
+      />
+      <van-icon name="share" color="#777" />
     </div>
     <!-- /底部区域 -->
+    <!-- 发布评论 -->
+    <van-popup
+      v-model="isPostShow"
+      position="bottom"
+      :style="{ height: '30%' }"
+    >
+      <post-comment :target="articleId" @post-success="onPostSuccess" />
+    </van-popup>
+    <!-- /发布评论 -->
+    <!-- 评论回复 -->
+    <van-popup
+      v-model="isReplyShow"
+      position="bottom"
+      :style="{ height: '60%' }"
+    >
+      <comment-reply v-if="isReplyShow" :comment="replyComment" :article-id="articleId" @close="isReplyShow = false" />
+    </van-popup>
+    <!-- /评论回复 -->
   </div>
 </template>
-
 <script>
 /* 知识点：类似于github的 markdown的css样式文件 */
 import './github-markdown.css'
@@ -66,13 +90,17 @@ import {
 import { ImagePreview } from 'vant'
 import { addFollow, deleteFollow } from '@/api/user'
 import CommentList from './components/comment-list.vue'
-// 在组建中获取动态路由参数：
+import PostComment from './components/post-comment.vue'
+import CommentReply from './components/comment-reply.vue'
+// 在组件中获取动态路由参数：
 // 1. this.$route.params.xxx
 // 2. props传参，推荐，【知识点】：在router中设置参数，props: true
 export default {
   name: 'ArticleIndex',
   components: {
-    CommentList
+    CommentList,
+    PostComment,
+    CommentReply
   },
   props: {
     articleId: {
@@ -84,7 +112,12 @@ export default {
     return {
       article: {}, // 文章数据对象
       isFollowLoading: false, // 关注用户的按钮的 loading，防止连续点击
-      isCollectLoading: false // 收藏文章按钮的 loading
+      isCollectLoading: false, // 收藏文章按钮的 loading
+      isPostShow: false, // 控制发布评论的显示状态
+      isReplyShow: false, // 评论回复的显示状态
+      commentList: [], // 文章评论列表
+      totalCommentCount: 0, // 评论的总数量
+      replyComment: {} // 当前回复评论对象
     }
   },
   created () {
@@ -171,6 +204,21 @@ export default {
           })
         }
       })
+    },
+    onPostSuccess (comment) {
+      // console.log(comment)
+      // 把发布成功的评论内容放到评论列表底部
+      this.commentList.unshift(comment)
+      // 更新评论的总数量
+      this.totalCommentCount++
+      // 关闭发布评论弹出层
+      this.isPostShow = false
+    },
+    onReplyClick (comment) {
+      // console.log('reply', comment)
+      this.replyComment = comment
+      // 展示回复内容
+      this.isReplyShow = true
     }
   }
 }
@@ -213,16 +261,29 @@ ul {
 }
 .article-bottom {
   position: fixed;
+  left: 0;
+  right: 0;
   bottom: 0;
-  .art-bot-wrap {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    .comment-btn {
-      width: 180px;
-    }
-    .van-icon {
-      flex: 1;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-sizing: border-box;
+  height: 44px;
+  // border-top: 1px solid #d8d8d8;
+  background-color: #fff;
+  .comment-btn {
+    width: 141px;
+    height: 23px;
+    // border: 1px solid #eee;
+    font-size: 15px;
+    line-height: 23px;
+    color: #a7a7a7;
+  }
+  .van-icon {
+    font-size: 20px;
+    .van-info {
+      font-size: 11px;
+      background-color: #e22829;
     }
   }
 }
