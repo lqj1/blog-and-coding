@@ -48,6 +48,11 @@ const routes = [
     name: 'article',
     component: () => import('@/views/article/'),
     props: true // 知识点，将动态路由参数映射到组件的props中，无论是访问还是维护都很方便
+  },
+  {
+    path: '/user/profile',
+    name: 'user-profile',
+    component: () => import('@/views/user-profile')
   }
 ]
 
