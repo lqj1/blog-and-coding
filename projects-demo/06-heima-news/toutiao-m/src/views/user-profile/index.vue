@@ -4,6 +4,14 @@
     <van-nav-bar class="app-nav-bar" title="个人信息" left-arrow @click-left="$router.back()" />
     <!-- 导航栏 -->
     <!-- 单元格 -->
+    <!-- 知识点：头像上传，隐藏原文件上传插件，让用户点击选择，image/*可以选择所有的文件 -->
+    <input
+      type="file"
+      ref="file"
+      hidden
+      accept="image/*"
+      @change="onFileChange"
+    >
     <van-cell title="头像" is-link center>
       <van-image
         width="30"
@@ -11,11 +19,12 @@
         round
         fit="cover"
         :src="user.photo"
+        @click="$refs.file.click()"
       />
     </van-cell>
     <van-cell title="昵称" is-link :value="user.name" @click="isEditNameShow = true" ></van-cell>
     <van-cell title="性别" is-link :value="user.gender === 0 ? '男' : '女'" @click="isEditGenderShow = true"></van-cell>
-    <van-cell title="生日" is-link :value="user.birthday"></van-cell>
+    <van-cell title="生日" is-link :value="user.birthday" @click="isEditBirthdayShow = true"></van-cell>
     <!-- /单元格 -->
     <!-- 修改昵称弹出层 -->
     <van-popup
@@ -59,9 +68,21 @@
     >
       <update-birthday
         v-if="isEditBirthdayShow"
-        v-model="user.gender"
-        :gender.sync="user.gender"
+        v-model="user.birthday"
         @close="isEditBirthdayShow = false" />
+    </van-popup>
+
+    <!-- 修改头像 -->
+    <van-popup
+      v-model="isEditPhotoShow"
+      position="bottom"
+      :style="{ height: '100%'}"
+    >
+      <update-photo
+        v-if="isEditPhotoShow"
+        :file="previewImage"
+        @update-photo="user.photo = $event"
+        @close="isEditPhotoShow = false" />
     </van-popup>
   </div>
 </template>
@@ -71,19 +92,23 @@ import { getUserProfile } from '@/api/user'
 import UpdateName from './components/update-name.vue'
 import UpdateGender from './components/update-gender.vue'
 import UpdateBirthday from './components/update-birthday.vue'
+import UpdatePhoto from './components/update-photo.vue'
 export default {
   name: 'UserProfile',
   components: {
     UpdateName,
     UpdateGender,
-    UpdateBirthday
+    UpdateBirthday,
+    UpdatePhoto
   },
   data () {
     return {
       user: {}, // 用户数据
       isEditNameShow: false, // 编辑昵称的显示状态
       isEditGenderShow: false, // 编辑性別的显示状态
-      isEditBirthdayShow: false // 编辑生日的显示状态
+      isEditBirthdayShow: false, // 编辑生日的显示状态
+      isEditPhotoShow: false, // 编辑头像的显示状态
+      previewImage: null // 上传预览图片
     }
   },
   created () {
@@ -93,6 +118,17 @@ export default {
     async loadUserProfile () {
       const { data } = await getUserProfile()
       this.user = data.data
+    },
+    onFileChange () {
+      // 展示弹出层
+      this.isEditPhotoShow = true
+      // 在弹出层中预览图片
+      // const blob = window.URL.createObjectURL(this.$refs.file.files[0])  // 这里传过去的是 string
+      // form-data 要求传过去的是文件对象
+      const file = this.$refs.file.files[0]
+      this.previewImage = file
+      // 知识点：为了解决相同文件可以触发 change 事件，在结束时将值置空
+      this.$refs.file.value = ''
     }
   }
 }
