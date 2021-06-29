@@ -1,6 +1,6 @@
 <template>
   <div class="updatePhoto">
-    <img :src="image" ref="image" />
+    <img class="image" :src="image" ref="image" />
     <van-nav-bar
       class="toolbar"
       left-text="取消"
@@ -28,40 +28,51 @@ export default {
   },
   data () {
     return {
-      image: window.URL.createObjectURL(this.file)
+      image: window.URL.createObjectURL(this.file),
+      cropper: null // 裁切器实例
     }
   },
   mounted () {
     // 获取需要裁切的图片 DOM
     const image = this.$refs.image
-    const cropper = new Cropper(image, {
-      aspectRatio: 16 / 9,
-      crop (event) {
-        console.log(event.detail.x)
-        console.log(event.detail.y)
-        console.log(event.detail.width)
-        console.log(event.detail.height)
-        console.log(event.detail.rotate)
-        console.log(event.detail.scaleX)
-        console.log(event.detail.scaleY)
-      }
+    this.cropper = new Cropper(image, {
+      viewMode: 1,
+      dragMode: 'move',
+      aspectRatio: 1,
+      // autoCropArea: 1,
+      cropBoxMovable: false,
+      cropBoxResizable: false,
+      background: false,
+      movable: true
     })
-    console.log(cropper)
   },
   methods: {
+    getCroppedCanvas () {
+      return new Promise(resolve => {
+        this.cropper.getCroppedCanvas().toBlob((file) => {
+          resolve(file)
+        })
+      })
+    },
     async onConfirm () {
       this.$toast.loading({
         message: '保存中',
         forbidclick: true
       })
+
+      const file = await this.getCroppedCanvas()
+      const fd = new FormData()
+      fd.append('photo', file) // 上传裁切后的图片
+
       // 如果要求 Content-Type 是 multipart/form-data，则一定要提交 FormData 数据对象
       // 专门用于文件上传，不能提交 {}
-      const fd = new FormData()
-      fd.append('photo', this.file)
+      // const fd = new FormData()
+      // fd.append('photo', this.file)
       await updateUserPhoto(fd)
       this.$toast.success('保存成功')
       // 更新父组件中的用户头像
-      this.$emit('update-photo', this.image)
+      // this.$emit('update-photo', this.image)
+      this.$emit('update-photo', window.URL.createObjectURL(file)) // 将裁切之后的文件转成图片上传
       // 关闭弹出层
       this.$emit('close')
     }
@@ -75,5 +86,10 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
+  background-color: #000;
+}
+.image {
+  display: block;
+  max-width: 100%;
 }
 </style>

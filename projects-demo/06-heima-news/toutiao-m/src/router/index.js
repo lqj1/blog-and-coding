@@ -14,6 +14,7 @@ const routes = [
   {
     // 一级路由渲染到根组件中的 router-view
     path: '/',
+    name: 'layout',
     component: () => import('@/views/layout/'),
     children: [
       {
@@ -53,6 +54,11 @@ const routes = [
     path: '/user/profile',
     name: 'user-profile',
     component: () => import('@/views/user-profile')
+  },
+  {
+    path: '/user/chat',
+    name: 'user-chat',
+    component: () => import('@/views/user-chat')
   }
 ]
 

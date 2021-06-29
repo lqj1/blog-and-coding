@@ -47,7 +47,7 @@
       <van-grid-item class="nav-grid-item" icon-prefix="icon" icon="lishi" text="历史" />
     </van-grid>
     <van-cell title="消息通知" is-link to="/" />
-    <van-cell class="mb-4" title="小智同学" is-link to="/" />
+    <van-cell class="mb-4" title="小智同学" is-link to="/user/chat" />
     <van-cell v-if="user" class="logout-cell" title="退出登录" @click="onLogout"/>
   </div>
 </template>
