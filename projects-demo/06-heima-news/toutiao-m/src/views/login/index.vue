@@ -67,8 +67,11 @@ export default {
         // 将后端返回的用户登陆状态（token)放到vuex中
         this.$store.commit('setUser', data.data)
 
-        // 登陆成功，跳转回原来页面，这种方式并不好
-        this.$router.back()
+        // 清除 layout 的缓存，让它重新渲染，这样加载的就是新的用户的登陆页面
+        this.$store.commit('removeCachePage', 'LayoutIndex')
+        // 登陆成功，跳转回原来页面，这种方式并不好，如果直接进入登录页，返回就有问题
+        // this.$router.back()
+        this.$router.push(this.$route.query.redirect || '/') // 这是在 request.js中存储的
       } catch (err) {
         console.log(err)
         this.$toast.fail('登陆失败')

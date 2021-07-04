@@ -23,6 +23,16 @@ export default {
     return {
       active: 0
     }
+  },
+  mounted () {
+    // 渲染成功之后，将当前组件再次缓存起来
+    this.$store.commit('addCachePage', 'LayoutIndex')
+  },
+  activated () {
+    console.log('activated')
+  },
+  deactivated () {
+    console.log('deactivated')
   }
 }
 </script>
