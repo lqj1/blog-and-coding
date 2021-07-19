@@ -1,9 +1,11 @@
 <template>
+  <router-view />
   <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+    <router-link to="/">首页</router-link> |
+    <router-link to="/about">分类</router-link>
+    <router-link to="/about">购物车</router-link>
+    <router-link to="/about">我的</router-link>
   </div>
-  <router-view/>
 </template>
 
 <style lang="scss">
