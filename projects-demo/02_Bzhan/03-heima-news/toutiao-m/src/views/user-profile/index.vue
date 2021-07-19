@@ -33,7 +33,7 @@
       :style="{ height: '100%'}"
     >
     <!-- 知识点：通过 $event 直接拿到子组件传的参数 -->
-    <!-- 知识点：当传给子组件的数据既然使用又要修改，例如这里的 name，这种情况下，我们可以使用 v-model 来简写 -->
+    <!-- 知识点：当传给子组件的数据既要使用又要修改，例如这里的 name，这种情况下，我们可以使用 v-model 来简写 -->
       <!-- <update-name :name="user.name" @update-name="user.name = $event" @close="isEditNameShow = false" /> -->
       <!-- v-model="user.name" 相当于 :value="user.name" @input="user.name = $event"，默认传递 value，默认监听 input -->
       <update-name
