@@ -8,12 +8,14 @@
       <img src="~assets/images/1.png" alt="">
     </div>
     <recommend-view :recommends="recommends"></recommend-view>
+    <tab-control :title="['畅销','新书','精选']"></tab-control>
   </div>
 </template>
 
 <script>
 import NavBar from 'components/common/navbar/NavBar'
 import RecommentView from './ChildComps/RecommentView'
+import TabControl from 'components/content/tabControl/TabControl'
 import { getHomeAllData } from 'network/home'
 import { ref, reactive, onMounted } from 'vue'
 export default {
@@ -33,7 +35,8 @@ export default {
   },
   components: {
     NavBar,
-    RecommentView
+    RecommentView,
+    TabControl
   }
 }
 </script>
