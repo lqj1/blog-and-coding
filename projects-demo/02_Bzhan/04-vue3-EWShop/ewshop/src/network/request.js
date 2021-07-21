@@ -25,4 +25,6 @@ export function request(config) {
       // 如果有错误，这里来处理，比如处理一些服务器返回的错误码
     }
   );
+  // 一定要注意返回这句代码
+  return instance(config);
 }

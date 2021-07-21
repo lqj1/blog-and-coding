@@ -1,13 +1,14 @@
 <template>
   <div class="tab-control">
-    <div v-for="(item,index) in titles" :key="index" class="tab-control-item" @click="itemClick(index)"
-      :class="{active: index == currentIndex }">
+    <div v-for="(item,index) in titles" :key="index" @click="itemClick(index)" class="tab-control-item"
+      :class="{active:index == currentIndex}">
       <span>{{item}}</span>
     </div>
   </div>
 </template>
 
 <script>
+import { ref } from 'vue'
 export default {
   name: 'TabControl',
   props: {
@@ -18,11 +19,12 @@ export default {
       }
     }
   },
-  setup () {
+  setup (props, { emit }) {
     let currentIndex = ref(0)
     // 方法
     const itemClick = (index) => {
       currentIndex.value = index;
+      emit('tabClick', index)
     }
     return {
       currentIndex,
@@ -41,14 +43,17 @@ export default {
   font-size: 14px;
   background-color: #fff;
   width: 100%;
-  .tab-control0-item {
+  z-index: 10;
+  position: sticky;
+  top: 44px;
+  .tab-control-item {
     flex: 1;
     span {
       padding: 6px;
     }
   }
   .active {
-    color: var(--color-tint)
+    color: var(--color-tint);
     span {
       border-bottom: 3px solid var(--color-tint);
     }
