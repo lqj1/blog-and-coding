@@ -23,7 +23,7 @@ export default {
     let currentIndex = ref(0)
     // 方法
     const itemClick = (index) => {
-      currentIndex.value = index;
+      currentIndex.value = index
       emit('tabClick', index)
     }
     return {
