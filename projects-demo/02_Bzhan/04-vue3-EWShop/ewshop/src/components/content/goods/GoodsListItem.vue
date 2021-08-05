@@ -1,5 +1,5 @@
 <template>
-  <div class="goods-item">
+  <div class="goods-item" @click="itemClick">
     <img v-lazy="product.cover_url" alt="">
     <div class="goods-info">
       <p>{{product.title}}</p>
@@ -10,12 +10,24 @@
 </template>
 
 <script>
+import { useRouter } from 'vue-router'
 export default {
   name: 'GoodsListItem',
   props: {
     product: Object,
-    default() {
+    default () {
       return {}
+    }
+  },
+  setup (props) {
+    const router = useRouter()
+    return {
+      itemClick: () => {
+        router.push({
+          path: '/detail',
+          query: { id: props.product.id }
+        })
+      }
     }
   }
 }

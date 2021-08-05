@@ -205,3 +205,57 @@ var input = {
 };
 var output = flatten(input);
 // output 如下
+// {
+//   "a": 1,
+//   "b[0]": 1,
+//   "b[1]": 2,
+//   "b[2].c": true,
+//   "b[3][0]": 3,
+//   "d.e": 2,
+//   "d.f": 3,
+//   // "g": null, 值为null或者undefined，丢弃
+// }
+let result = {};
+var flatten = (data, key) => {
+  if (data instanceof Array) {
+    data.forEach((param, index) => {
+      if (param instanceof Object) {
+        flatten(param, `${key}[${index}]`);
+      } else {
+        result[`${key}[${index}]`] = param;
+      }
+    });
+  } else if (data instanceof Object) {
+    for (var itemKey in data) {
+      const itemValue = data[itemKey];
+      if (itemValue instanceof Object) {
+        flatten(itemValue, itemKey);
+      } else if (itemValue) {
+      }
+    }
+  }
+};
+
+Array.prototype.myMap = function (fn) {
+  // 判断输入的第一个参数是不是函数
+  if (typeof fn !== 'function') {
+    throw new TypeError(fn + 'is not a function');
+  }
+  // 获取需要处理的数组内容，数组.方法，所以 this 就是数组本身
+  const arr = this;
+  const len = arr.length;
+  // 新建一个空数组用于装载新的内容
+  const temp = new Array(len);
+  // 对数组中的每个值进行处理
+  for (let i = 0; i < len; i++) {
+    // 获取第二个参数，改变this指向
+    let result = fn.call(arguments[1], arr[i], i, arr);
+    temp[i] = result;
+  }
+  // 返回新结果
+  return temp;
+};
+const arr = [1, 2, 3, 4];
+const newArr = arr.myMap(value => value * 3);
+console.log(arr); // [ 1, 2, 3, 4 ] 原数组不变
+console.log(newArr); // [ 3, 6, 9, 12 ]

@@ -5,6 +5,7 @@ const Category = () => import('../views/category/Category');
 const Detail = () => import('../views/detail/Detail');
 const Profile = () => import('../views/profile/Profile');
 const ShopCart = () => import('../views/shopcart/ShopCart');
+const Register = () => import('../views/profile/Register');
 
 const routes = [
   {
@@ -59,6 +60,14 @@ const routes = [
     meta: {
       // 可用于导航守卫
       title: '图书兄弟-个人中心',
+    },
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: Register,
+    meta: {
+      title: '图书兄弟-用户注册',
     },
   },
 ];

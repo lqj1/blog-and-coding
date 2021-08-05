@@ -27,7 +27,7 @@
         <div class="content">
           <van-card v-for="item in showGoods" :key="item.id" :num="item.comments_count" :price="item.price"
             :tag="item.comments_count >= 0 ? '流行': '标签'" :desc="item.updated_at" :title="item.title"
-            :thumb="item.cover_url" :lazy-load=true />
+            :thumb="item.cover_url" :lazy-load=true @click="itemClick(item.id)" />
         </div>
       </div>
       <!-- /列表详情 -->
@@ -43,11 +43,14 @@
 import NavBar from 'components/common/navbar/NavBar'
 import BackTop from 'components/common/backtop/BackTop'
 import { ref, reactive, onMounted, computed, watchEffect, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { getCategory, getCategoryGoods } from 'network/category'
 import BScroll from 'better-scroll'
 export default {
   name: 'Category',
   setup () {
+    // 定义路由器
+    const router = useRouter()
     let activeKey = ref(0)
     let activeName = ref(1)
     let categories = ref([])
@@ -170,7 +173,13 @@ export default {
       showGoods,
       bscroll,
       isShowBackTop,
-      bTop
+      bTop,
+      itemClick: (id) => {
+        router.push({
+          path: '/detail',
+          query: { id }
+        })
+      }
     }
   },
   components: {
@@ -209,9 +218,9 @@ export default {
     height: 100vh;
     padding: 10px;
     text-align: left;
-    .content {
-      padding-top: 100px;
-    }
+    // .content {
+    //   padding-top: 100px;
+    // }
   }
 }
 .van-card__thumb {
