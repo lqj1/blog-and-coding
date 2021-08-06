@@ -95,7 +95,6 @@ export default {
     let bscroll = reactive({})
     onMounted(() => {
       getCategory().then(res => {
-        // console.log('res')
         categories.value = res.categories
       })
       // 初始化只需要初始化一个类别就可以
