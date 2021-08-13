@@ -59,7 +59,7 @@ export default {
           if (res.status === '201') {
             Toast.success('注册成功')
             setTimeout(() => {
-              router.push({path:'/login'})
+              router.push({ path: '/login' })
             }, 1000);
           }
           userinfo.password = ''

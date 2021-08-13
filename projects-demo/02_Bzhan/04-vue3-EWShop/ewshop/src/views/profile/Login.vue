@@ -31,6 +31,7 @@ import { ref, reactive, toRefs } from 'vue'
 import { login } from 'network/user'
 import { Notify, Toast } from 'vant'
 import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 export default {
   name: "Login",
   components: {
@@ -38,6 +39,7 @@ export default {
   },
   setup () {
     const router = useRouter()
+    const store = useStore()
     const userinfo = reactive({
       email: '',
       password: '',
@@ -46,7 +48,8 @@ export default {
       login(userinfo).then(res => {
         // 将 token 保存到本地 window.localStorage, setItem(key, value)  getItem(key)
         window.localStorage.setItem('token', res.access_token)
-        // 在 vuex 中保存 isLogin
+        // 在 vuex 中保存 isLogin，commit调用 mutations 中的方法
+        store.commit('setIsLogin', true) // true是payload中附带的参数，在Profile.vue中设置为false
         Toast.success('登录成功')
         userinfo.email = ''
         userinfo.password = ''

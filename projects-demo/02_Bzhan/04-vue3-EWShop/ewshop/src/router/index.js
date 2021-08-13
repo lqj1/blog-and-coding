@@ -78,7 +78,7 @@ const routes = [
     meta: {
       title: '图书兄弟-用户登录',
     },
-  }
+  },
 ];
 
 const router = createRouter({

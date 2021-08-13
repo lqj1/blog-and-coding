@@ -13,3 +13,9 @@ export function login(data) {
     data,
   });
 }
+export function logout(data) {
+  return request({
+    url: 'api/auth/logout',
+    method: 'post',
+  });
+}
