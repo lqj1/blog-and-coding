@@ -19,7 +19,7 @@
     </router-link>
     <router-link class="tab-bar-item" to="/shopcart">
       <div class="icon">
-        <van-badge :content="20" max="9">
+        <van-badge :content="$store.state.cartCount" max="9">
           <i class="iconfont icon-gouwuche1"></i>
         </van-badge>
       </div>
@@ -31,7 +31,22 @@
     </router-link>
   </div>
 </template>
-
+<script>
+import { onMounted } from 'vue'
+import { useStore } from 'vuex'
+// 通过在App.vue中定义该方法，这样在页面其他任何地方刷新之后都能调用该方法
+export default {
+  setup () {
+    const store = useStore()
+    onMounted(() => {
+      const store = useStore()
+      onMounted(() => {
+        store.dispatch('updateCart') // 通过该方法添加购物车的数量
+      })
+    })
+  }
+}
+</script>
 <style lang="scss">
 @import 'assets/css/base.css';
 @import 'assets/css/font/iconfont.css';

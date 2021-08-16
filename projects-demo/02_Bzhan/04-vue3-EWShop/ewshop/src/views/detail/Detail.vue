@@ -12,8 +12,8 @@
       <van-tag plain type="danger">标签</van-tag>
     </template>
     <template #footer>
-      <van-button type="warning">加入购物车</van-button>
-      <van-button type="danger">立即购买</van-button>
+      <van-button type="warning" @click="handleAddCart">加入购物车</van-button>
+      <van-button type="danger" @click="goToCart">立即购买</van-button>
     </template>
   </van-card>
   <van-tabs v-model="active">
@@ -35,8 +35,12 @@
 <script>
 import NavBar from 'components/common/navbar/NavBar'
 import GoodsList from 'components/content/goods/GoodsList'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 import { ref, onMounted, reactive, toRefs } from 'vue'
+import { getDetail } from 'network/detail'
+import { addCart } from 'network/cart'
+import { Toast } from 'vant'
 export default {
   name: 'Detail',
   components: {
@@ -46,6 +50,8 @@ export default {
   setup () {
     let active = ref(1)
     const route = useRoute()
+    const router = useRouter()
+    const store = useStore()
     let id = ref(0)
     let book = reactive({
       detail: {},
@@ -60,10 +66,33 @@ export default {
         book.like_goods = res.like_goods
       })
     })
+    // 添加购物车
+    const handleAddCart = () => {
+      addCart({ goods_id: book.detail.id, num: 1 }).then(res => {
+        if (res.status === 201 || res.status === 204) {
+          Toast.success('添加成功')
+          // 添加成功后，调用 action.js 中的方法，然后改变红色徽章显示
+          store.dispatch('updateCart')
+        }
+      })
+    }
+    // 立即购买
+    const goToCart = () => {
+      addCart({ goods_id: book.detail.id, num: 1 }).then(res => {
+        if (res.status === 201 || res.status === 204) {
+          Toast.success('添加成功，显示购物车')
+          // 添加成功后，调用 action.js 中的方法，然后改变红色徽章显示
+          store.dispatch('updateCart')
+          router.push({ path: '/shopcart' })
+        }
+      })
+    }
     return {
       id,
       ...toRefs(book),  // 结构出book里面的每个对象
-      active
+      active,
+      handleAddCart,
+      goToCart
     }
   }
 }

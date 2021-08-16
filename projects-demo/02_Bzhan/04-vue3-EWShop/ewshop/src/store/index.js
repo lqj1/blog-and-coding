@@ -7,6 +7,7 @@ const state = {
     // isLogin: false, // 这样设置一刷新页面就丢失了，所以默认值需要从localStorage中获取
     isLogin: window.localStorage.getItem('token') ? true : false,
   },
+  cartCount: 0,
 };
 export default createStore({
   state,
