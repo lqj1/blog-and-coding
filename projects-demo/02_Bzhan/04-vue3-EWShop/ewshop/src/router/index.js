@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import store from '../store';
 // import Home from '../views/Home.vue'  // 不能懒加载
 const Home = () => import('../views/home/Home');
 const Category = () => import('../views/category/Category');
@@ -7,6 +8,8 @@ const Profile = () => import('../views/profile/Profile');
 const ShopCart = () => import('../views/shopcart/ShopCart');
 const Register = () => import('../views/profile/Register');
 const Login = () => import('../views/profile/Login');
+
+import { Notify, Toast } from 'vant';
 
 const routes = [
   {
@@ -52,6 +55,7 @@ const routes = [
     meta: {
       // 可用于导航守卫
       title: '图书兄弟-购物车',
+      isAuthRequired: true,
     },
   },
   {
@@ -61,6 +65,7 @@ const routes = [
     meta: {
       // 可用于导航守卫
       title: '图书兄弟-个人中心',
+      isAuthRequired: true,
     },
   },
   {
@@ -88,8 +93,14 @@ const router = createRouter({
 
 // 导航守卫-跳转之前执行
 router.beforeEach((to, from, next) => {
-  // 如果没有登陆，在这里到login
-  next();
+  // 需要授权，但没有登录
+  if (to.meta.isAuthRequired && store.state.user.isLogin === false) {
+    Notify('您还没有登录，请先登录');
+    return next('/login');
+  } else {
+    // 不需要登录，直接放行
+    next();
+  }
   document.title = to.meta; // 改变网页标题
 });
 export default router;
