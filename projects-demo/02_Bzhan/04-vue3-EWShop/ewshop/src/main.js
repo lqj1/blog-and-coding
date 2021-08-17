@@ -5,6 +5,11 @@ import store from './store';
 import 'vant/lib/index.css';
 
 import {
+  SubmitBar,
+  CheckboxGroup,
+  SwipeCell,
+  Stepper,
+  Checkbox,
   Field,
   Form,
   Image as VanImage,
@@ -42,6 +47,11 @@ createApp(App)
   .use(Form)
   .use(Field)
   .use(VanImage)
+  .use(Checkbox)
+  .use(Stepper)
+  .use(SwipeCell)
+  .use(CheckboxGroup)
+  .use(SubmitBar)
   .use(store)
   .use(router)
   .mount('#app');

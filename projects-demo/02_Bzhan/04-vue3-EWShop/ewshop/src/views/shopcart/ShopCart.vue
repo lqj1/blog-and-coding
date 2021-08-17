@@ -99,7 +99,6 @@ export default {
     // 异步改变购物车数量
     const onChange = (value, detail) => {
       Toast.loading({ message: '修改中...', forbidClick: true });
-
       modifyCart(detail.name, { num: value }).then(res => {
         //将在onMounted中的list中的num也要改
         state.list.forEach(item => {
@@ -107,12 +106,9 @@ export default {
             item.num = value;
           }
         })
-
         Toast.clear();
       })
-
     }
-
     // 复选框改变处理
     const groupChange = (result) => {
       if (result.length == state.list.length) {
@@ -120,9 +116,7 @@ export default {
       } else {
         state.checkAll = false;
       }
-
       console.log(result);
-
       state.result = result;
       // 改变数据表中选中状态
       checkedCard({ cart_ids: result });

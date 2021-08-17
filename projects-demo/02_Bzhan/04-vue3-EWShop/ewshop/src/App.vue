@@ -39,10 +39,7 @@ export default {
   setup () {
     const store = useStore()
     onMounted(() => {
-      const store = useStore()
-      onMounted(() => {
-        store.dispatch('updateCart') // 通过该方法添加购物车的数量
-      })
+      store.dispatch('updateCart') // 通过该方法添加购物车的数量
     })
   }
 }
