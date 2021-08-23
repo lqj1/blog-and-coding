@@ -30,7 +30,7 @@ export function request(config) {
       return res.data ? res.data : res;
     },
     err => {
-      // console.log(err.response);
+      // console.log(err);
       // 如果有错误，这里来处理，比如处理一些服务器返回的错误码
       if (err.response.status === 401) {
         // 服务器返回没有授权的接口

@@ -5,6 +5,9 @@ import store from './store';
 import 'vant/lib/index.css';
 
 import {
+  AddressEdit,
+  AddressList,
+  Icon,
   SubmitBar,
   CheckboxGroup,
   SwipeCell,
@@ -52,6 +55,9 @@ createApp(App)
   .use(SwipeCell)
   .use(CheckboxGroup)
   .use(SubmitBar)
+  .use(Icon)
+  .use(AddressEdit)
+  .use(AddressList)
   .use(store)
   .use(router)
   .mount('#app');

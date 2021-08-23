@@ -8,6 +8,8 @@ const Profile = () => import('../views/profile/Profile');
 const ShopCart = () => import('../views/shopcart/ShopCart');
 const Register = () => import('../views/profile/Register');
 const Login = () => import('../views/profile/Login');
+const Address = () => import('../views/profile/Address');
+const AddressEdit = () => import('../views/profile/AddressEdit');
 
 import { Notify, Toast } from 'vant';
 
@@ -82,6 +84,24 @@ const routes = [
     component: Login,
     meta: {
       title: '图书兄弟-用户登录',
+    },
+  },
+  {
+    path: '/address',
+    name: 'Address',
+    component: Address,
+    meta: {
+      title: '图书兄弟-地址管理',
+      isAuthRequired: true,
+    },
+  },
+  {
+    path: '/addressedit',
+    name: 'AddressEdit',
+    component: AddressEdit,
+    meta: {
+      title: '图书兄弟-编辑地址',
+      isAuthRequired: true,
     },
   },
 ];

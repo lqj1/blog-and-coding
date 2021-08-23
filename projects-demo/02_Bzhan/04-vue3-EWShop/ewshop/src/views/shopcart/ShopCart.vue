@@ -145,7 +145,7 @@ export default {
       })
     }
 
-    // 创建定单
+    // 创建订单
     const onSubmit = () => {
       if (state.result.length == 0) {
         Toast.fail("请选择商品进行结算");
