@@ -1,13 +1,12 @@
 <template>
   <div>
-    <h1>这是首页</h1>
-    <router-link to="/page">gotoPage</router-link>
+    <h1>shop主页</h1>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Home'
+
 }
 </script>
 
