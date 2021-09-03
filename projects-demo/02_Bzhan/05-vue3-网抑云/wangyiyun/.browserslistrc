@@ -1,0 +1,13 @@
+# 这个值会被 @babel/preset-env 和 Autoprefixer 用来确定需要转义的 JavaScript 特性和需要添加的 CSS浏览器前缀
+
+# 兼容到超过百分之一的用户使用的浏览器
+# > 1%
+# 兼容到最后的两个版本
+# last 2 versions
+# 还存在的浏览器
+# not dead
+
+# 注释掉上面的使 postcss.config.js 中的配置生效
+# 主要针对移动端
+Android >= 4.0
+iOS >= 8
