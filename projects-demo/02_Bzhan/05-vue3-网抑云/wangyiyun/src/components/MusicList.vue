@@ -7,8 +7,12 @@
     <div class="mlist">
       <div v-swiper:mySwiper="swiperOption" class="swiper-container">
         <div class="swiper-wrapper">
+<<<<<<< HEAD
           <router-link :to="{path:'/listview', query:{id: item.id}}" class="swiper-slide"
             v-for="(item,index) in musicList" :key="index">
+=======
+          <div class="swiper-slide" v-for="(item,index) in musicList" :key="index">
+>>>>>>> 7f13b7d360fdbec50a808d395fab16db8a9122f5
             <img :src="item.picUrl" alt="">
             <div class="name">{{item.name}}</div>
             <div class="count">
@@ -17,7 +21,11 @@
               </svg>
               {{formatValue(item.playCount)}}
             </div>
+<<<<<<< HEAD
           </router-link>
+=======
+          </div>
+>>>>>>> 7f13b7d360fdbec50a808d395fab16db8a9122f5
         </div>
         <div class="swiper-pagination"></div>
       </div>
@@ -33,6 +41,7 @@ import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper'
 // import style (<= Swiper 5.x)
 import 'swiper/css/swiper.css'
 
+<<<<<<< HEAD
 // vue2 写法
 export default {
   components: {
@@ -74,6 +83,49 @@ export default {
   filter: {
   }
 }
+=======
+// // vue2 写法
+// export default {
+//   components: {
+//   },
+//   data () {
+//     return {
+//       swiperOption: {
+//         slidesPerView: 3, // 一行显示多少张
+//         spaceBetween: 10,
+//         // 不需要配置点
+//         // pagination: {
+//         //   el: '.swiper-pagination'
+//         // },
+//         // ...
+//       },
+//       musicList: [], // 推荐列表数据
+//     }
+//   },
+//   methods: {
+//     formatValue: function (num) {
+//       let res = 0
+//       if (num >= 100000000) {
+//         res = (num / 100000000).toFixed(2) + '亿'
+//       } else if (num >= 10000) {
+//         res = (num / 10000).toFixed(2) + '万'
+//       }
+//       return res
+//     }
+//   },
+//   directives: {
+//     swiper: directive
+//   },
+//   mounted: async function () {
+//     let res = await getMusicList()
+//     this.musicList = res.data.result
+//     console.log('res', res);
+//   },
+//   // 过滤函数
+//   filter: {
+//   }
+// }
+>>>>>>> 7f13b7d360fdbec50a808d395fab16db8a9122f5
 </script>
 
 <style lang="less" scoped>
