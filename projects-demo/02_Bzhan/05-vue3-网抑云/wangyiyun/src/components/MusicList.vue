@@ -31,6 +31,7 @@ import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper'
 // import 'swiper/swiper-bundle.css'
 // import style (<= Swiper 5.x)
 import 'swiper/css/swiper.css'
+// vue3 写法
 
 // // vue2 写法
 // export default {
