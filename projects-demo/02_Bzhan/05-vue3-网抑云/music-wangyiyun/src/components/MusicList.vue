@@ -9,18 +9,7 @@
         :pagination="swiper_options.pagination" :slidesPerView="swiper_options.slidesPerView"
         :spaceBetween="swiper_options.spaceBetween">
         <swiper-slide v-for="(item,i) in state.musicList" :key="i">
-          <img class="img" :src="item.picUrl" alt="">
-          <div class="name">{{item.name}}</div>
-          <div class="count">
-            <svg class="icon" aria-hidden="true">
-              <use xlink:href="#icon-xiangyousanjiaoxing"></use>
-            </svg>
-            {{formatValue(item.playCount)}}
-          </div>
-        </swiper-slide>
-        <!-- <div class="swiper-wrapper">
-          <router-link :to="{path:'/listview', query:{id: item.id}}" class="swiper-slide"
-            v-for="(item,index) in state.musicList" :key="index">
+          <router-link :to="{path:'/listview', query:{id: item.id}}">
             <img class="img" :src="item.picUrl" alt="">
             <div class="name">{{item.name}}</div>
             <div class="count">
@@ -30,7 +19,7 @@
               {{formatValue(item.playCount)}}
             </div>
           </router-link>
-        </div> -->
+        </swiper-slide>
       </swiper>
     </div>
   </div>

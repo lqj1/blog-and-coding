@@ -13,7 +13,7 @@ export function getMusicList(limit = 10) {
     url: `/personalized?limit=${limit}`,
   });
 }
-// 获取歌单详情
+// 获取推荐歌单详情
 export function getPlayListDetail(id) {
   return request({
     data: id,

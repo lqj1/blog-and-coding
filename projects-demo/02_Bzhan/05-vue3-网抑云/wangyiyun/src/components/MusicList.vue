@@ -7,25 +7,23 @@
     <div class="mlist">
       <div v-swiper:mySwiper="swiperOption" class="swiper-container">
         <div class="swiper-wrapper">
-<<<<<<< HEAD
-          <router-link :to="{path:'/listview', query:{id: item.id}}" class="swiper-slide"
+          <<<<<<< HEAD <router-link :to="{path:'/listview', query:{id: item.id}}" class="swiper-slide"
             v-for="(item,index) in musicList" :key="index">
-=======
-          <div class="swiper-slide" v-for="(item,index) in musicList" :key="index">
->>>>>>> 7f13b7d360fdbec50a808d395fab16db8a9122f5
-            <img :src="item.picUrl" alt="">
-            <div class="name">{{item.name}}</div>
-            <div class="count">
-              <svg class="icon" aria-hidden="true">
-                <use xlink:href="#icon-xiangyousanjiaoxing"></use>
-              </svg>
-              {{formatValue(item.playCount)}}
+            =======
+            <div class="swiper-slide" v-for="(item,index) in musicList" :key="index">
+              >>>>>>> 7f13b7d360fdbec50a808d395fab16db8a9122f5
+              <img :src="item.picUrl" alt="">
+              <div class="name">{{item.name}}</div>
+              <div class="count">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-xiangyousanjiaoxing"></use>
+                </svg>
+                {{formatValue(item.playCount)}}
+              </div>
+              <<<<<<< HEAD </router-link>
+                =======
             </div>
-<<<<<<< HEAD
-          </router-link>
-=======
-          </div>
->>>>>>> 7f13b7d360fdbec50a808d395fab16db8a9122f5
+            >>>>>>> 7f13b7d360fdbec50a808d395fab16db8a9122f5
         </div>
         <div class="swiper-pagination"></div>
       </div>
