@@ -3,9 +3,20 @@
     <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link>
   </div> -->
-  <router-view />
-</template>
+  <div>
+    <router-view />
+    <play-controller></play-controller>
+  </div>
 
+</template>
+<script>
+import PlayController from '@/components/PlayController.vue'
+export default {
+  components: {
+    PlayController
+  }
+}
+</script>
 <style lang="less">
 * {
   margin: 0;

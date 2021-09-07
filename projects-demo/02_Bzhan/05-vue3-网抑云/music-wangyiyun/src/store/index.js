@@ -4,8 +4,15 @@ import { createStore } from 'vuex';
 // import getters from './getters';
 const state = {};
 export default createStore({
-  state,
-  // mutations,
+  state: {
+    playlist: [],
+    playCurrentIndex: 0,
+  },
+  mutations: {
+    setPlaylist: function(state, value) {
+      state.playlist = value;
+    },
+  },
   // actions,
   // getters,
 });

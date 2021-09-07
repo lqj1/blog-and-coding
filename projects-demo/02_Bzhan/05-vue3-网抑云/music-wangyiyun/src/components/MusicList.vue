@@ -16,7 +16,7 @@
               <svg class="icon" aria-hidden="true">
                 <use xlink:href="#icon-xiangyousanjiaoxing"></use>
               </svg>
-              {{formatValue(item.playCount)}}
+              <span>{{formatValue(item.playCount)}}</span>
             </div>
           </router-link>
         </swiper-slide>
@@ -65,7 +65,7 @@ export default {
     })
     // 格式化数据
     let formatValue = (num) => {
-      let res = 0
+      let res = num
       if (num >= 100000000) {
         res = (num / 100000000).toFixed(2) + '亿'
       } else if (num >= 10000) {
@@ -76,7 +76,7 @@ export default {
     onMounted(async () => {
       let res = await getMusicList()
       state.musicList = res.data.result
-      console.log('res', res);
+      // console.log('res', res);
     })
     return { state, swiper_options, formatValue };
   }
@@ -127,6 +127,10 @@ export default {
       color: #ddd;
       display: flex;
       align-items: center;
+      .icon {
+        width: 0.27rem;
+        height: 0.27rem;
+      }
     }
   }
 }
