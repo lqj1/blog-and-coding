@@ -28,7 +28,8 @@
           </div>
         </div>
         <div class="right">
-          <svg class="icon" aria-hidden="true">
+          <!-- 传入的 i 表示第几首 -->
+          <svg class="icon" aria-hidden="true" @click="playIndex(i)">
             <use xlink:href="#icon-icon-"></use>
           </svg>
           <svg class="icon" aria-hidden="true">
@@ -41,9 +42,14 @@
 </template>
 
 <script>
+import { computed, onMounted } from 'vue'
+import { useStore } from 'vuex'
 export default {
   props: ['playlist'],
   setup () {
+    onMounted(() => {
+
+    })
     let formatValue = (num) => {
       let res = num
       if (num >= 100000000) {
@@ -53,7 +59,14 @@ export default {
       }
       return res
     }
-    return { formatValue }
+    // 修改播放第几首的vuex
+    const store = useStore()
+    const playIndex = (index) => {
+      // console.log('index', index)
+      store.commit('setPlayIndex', index)
+    }
+
+    return { formatValue, playIndex }
   }
 }
 </script>

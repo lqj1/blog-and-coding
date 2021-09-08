@@ -76,7 +76,6 @@ export default {
     onMounted(async () => {
       let res = await getMusicList()
       state.musicList = res.data.result
-      // console.log('res', res);
     })
     return { state, swiper_options, formatValue };
   }
