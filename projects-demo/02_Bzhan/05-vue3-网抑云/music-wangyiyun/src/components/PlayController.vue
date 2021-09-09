@@ -18,7 +18,9 @@
         <use xlink:href="#icon-liebiao"></use>
       </svg>
     </div>
-    <play-music v-show="playShow" :playDetail="playlist[playCurrentIndex]" @back="playShow=!playShow"></play-music>
+    <play-music v-show="playShow" :playSong="playSong" :playDetail="playlist[playCurrentIndex]" :paused="paused"
+      @back="playShow=!playShow">
+    </play-music>
     <audio ref="myAudio"
       :src="`https://music.163.com/song/media/outer/url?id=${playlist[playCurrentIndex].id}.mp3`"></audio>
   </div>
@@ -36,6 +38,7 @@ export default {
     // 获取 vuex 数据
     const store = useStore()
     const playlist = computed(() => store.state.playlist)
+    // console.log('playlist', playlist);
     const playCurrentIndex = computed(() => store.state.playCurrentIndex)
     // 获取 audio
     const myAudio = ref(null)

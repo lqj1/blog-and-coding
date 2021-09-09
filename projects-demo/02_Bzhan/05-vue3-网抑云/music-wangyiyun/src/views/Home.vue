@@ -14,7 +14,7 @@
     <swiper-com></swiper-com>
     <!-- 图标栏 -->
     <icon-list></icon-list>
-    <!-- 每日推荐 -->
+    <!-- 发现好歌单 -->
     <music-list></music-list>
   </div>
 </template>

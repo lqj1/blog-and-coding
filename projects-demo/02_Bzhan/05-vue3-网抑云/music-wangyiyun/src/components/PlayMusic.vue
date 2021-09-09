@@ -19,19 +19,48 @@
         </svg>
       </div>
     </div>
-    <div class="play-content">
-      <img src="@/assets/images/needle-ab.png" alt="">
-      <img src="" alt="">
+    <div class="play-content" v-show="!lyricShow">
+      <img class="needle" :class="{active: !paused}" src="@/assets/images/needle-ab.png" alt="">
+      <img class="disc" src="@/assets/images/disc_default.png" alt="">
+      <img class="play-img" :src="playDetail.al.picUrl" alt="">
     </div>
-    <div class="play-liric"></div>
+    <div class="play-liric" v-show="lyricShow">
+
+    </div>
     <div class="progress"></div>
-    <div class="play-footer"></div>
+    <div class="play-footer">
+      <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-liebiaoxunhuan"></use>
+      </svg>
+      <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-shangyishoushangyige"></use>
+      </svg>
+      <svg v-if="paused" class="icon play" aria-hidden="true" @click="playSong">
+        <use xlink:href="#icon-bofang"></use>
+      </svg>
+      <svg v-else class="icon play" aria-hidden="true" @click="playSong">
+        <use xlink:href="#icon-zanting1"></use>
+      </svg>
+      <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-xiayigexiayishou"></use>
+      </svg>
+      <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-liebiao"></use>
+      </svg>
+    </div>
   </div>
 </template>
 
 <script>
+import { getLyric } from '@/api/index.js'
+import { ref } from 'vue'
 export default {
-  props: ['playDetail']
+  // 包括属性和方法
+  props: ['playDetail', 'paused', 'playSong'],
+  setup () {
+    let lyricShow = ref(true)
+    return { lyricShow }
+  }
 }
 </script>
 
@@ -42,7 +71,7 @@ export default {
   top: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #fff;
+  background-color: #FFF;
   .bg {
     position: absolute;
     left: 0;
@@ -71,6 +100,70 @@ export default {
     marquee {
       width: 5rem;
       flex: 1;
+    }
+  }
+  .play-content {
+    position: relative;
+    width: 7.5rem;
+    height: auto;
+    left: 0;
+    top: 1.5rem;
+    .needle {
+      width: 2.5rem;
+      height: auto;
+      position: absolute;
+      left: 3.2rem;
+      transform-origin: 0.3rem 0;
+      transform: rotate(-15deg);
+      z-index: 10;
+      transition: all 1s;
+    }
+    .needle.active {
+      transform: rotate(25deg);
+      transition: all 1s;
+    }
+    .disc {
+      width: 5.5rem;
+      height: auto;
+      border-radius: 50%;
+      position: absolute;
+      left: calc(50% - 2.75rem);
+      top: 2.5rem;
+    }
+    .play-img {
+      width: 3.6rem;
+      height: 3.6rem;
+      border-radius: 50%;
+      position: absolute;
+      left: calc(50% - 1.8rem);
+      top: 3.45rem;
+    }
+  }
+  .play-liric {
+    position: relative;
+    width: 7.5rem;
+    height: auto;
+    left: 0;
+    top: 1.5rem;
+  }
+  .play-footer {
+    width: 7.5rem;
+    height: 1.5rem;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.8rem;
+    .icon {
+      fill: #fff;
+      width: 0.5rem;
+      height: 0.5rem;
+    }
+    .play {
+      width: 0.8rem;
+      height: 0.8rem;
     }
   }
 }

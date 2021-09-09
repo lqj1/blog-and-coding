@@ -20,3 +20,10 @@ export function getPlayListDetail(id) {
     url: `/playlist/detail?id=${id}`,
   });
 }
+// 获取歌词
+export function getLyric(id) {
+  return request({
+    data: id,
+    url: `/lyric?id=${id}`,
+  });
+}
