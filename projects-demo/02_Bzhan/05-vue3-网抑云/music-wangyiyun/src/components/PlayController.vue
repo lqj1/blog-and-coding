@@ -42,8 +42,16 @@ export default {
     const playCurrentIndex = computed(() => store.state.playCurrentIndex)
     // 获取 audio
     const myAudio = ref(null)
+    let playlistValue = null
+    let playIndex = null
+    playlistValue = playlist.value
+    playIndex = playCurrentIndex.value
+    let playId = playlistValue[playIndex].id
     onMounted(() => {
       // console.dir(myAudio.value)
+      // store中异步获取歌词
+      // console.log('playlist', playlist.value[playCurrentIndex.value].id);
+      store.dispatch('reqLyric', { id: playId })
     })
     // 播放切换，初始值为暂停状态为真
     let paused = ref(true)
@@ -55,11 +63,23 @@ export default {
         myAudio.value.play()
         // 开始播放，暂停状态为假
         paused.value = false
+        // 更新时间
+        updateTime()
       } else {
         myAudio.value.pause()
         paused.value = true
+        // 取消时间更新的定时器
+        clearInterval(store.state.intervalId)
       }
     }
+    // 更新时间
+    const updateTime = () => {
+      console.log('currentTIme', myAudio.value.currentTime);
+      store.state.intervalId = setInterval(() => {
+        store.commit('setCurrentTime', myAudio.value.currentTime)
+      }, 1000)
+    }
+
     // 播放页面的显示
     let playShow = ref(false)
     return {
@@ -67,6 +87,7 @@ export default {
       playCurrentIndex,
       myAudio,
       playSong,
+      updateTime,
       paused,
       playShow
     }

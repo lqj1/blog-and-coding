@@ -25,7 +25,10 @@
       <img class="play-img" :src="playDetail.al.picUrl" alt="">
     </div>
     <div class="play-liric" v-show="lyricShow">
-
+      <p :class="{active:(currentTIme*1000 && currentTIme*1000<parseInt(item.min))}"
+        v-for="(item,i) in store.getters.lyricList" :key="i">
+        {{item.lyric}}
+      </p>
     </div>
     <div class="progress"></div>
     <div class="play-footer">
@@ -52,14 +55,20 @@
 </template>
 
 <script>
-import { getLyric } from '@/api/index.js'
-import { ref } from 'vue'
+// import { getLyric } from '@/api/index.js'
+import { ref, computed } from 'vue'
+import { useStore } from 'vuex'
 export default {
   // 包括属性和方法
   props: ['playDetail', 'paused', 'playSong'],
   setup () {
     let lyricShow = ref(true)
-    return { lyricShow }
+    // 获取store中歌词
+    const store = useStore()
+    const lyric = computed(() => store.state.lyric)
+    // getter中获取的歌词
+    // const lyricList = store.getters.lyricList
+    return { lyricShow, lyric, store }
   }
 }
 </script>
@@ -140,11 +149,18 @@ export default {
     }
   }
   .play-liric {
-    position: relative;
+    position: absolute;
     width: 7.5rem;
-    height: auto;
+    height: 8rem;
     left: 0;
-    top: 1.5rem;
+    top: calc(50% - 4rem);
+    text-align: center;
+    overflow: scroll;
+    color: #fff;
+    padding: 0.2rem 0;
+    .active {
+      color: orangered;
+    }
   }
   .play-footer {
     width: 7.5rem;

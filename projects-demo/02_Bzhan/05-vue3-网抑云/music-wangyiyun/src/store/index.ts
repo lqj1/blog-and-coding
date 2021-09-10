@@ -1,24 +1,48 @@
 import { createStore } from 'vuex';
-import { getLyric } from '@/api/index.js'; //这不是在组件中，需要调方法
-// import axios from 'axios'
+// import api from '@/api/index';
+import axios from 'axios'
 // import mutations from './mutations';
 // import actions from './actions';
 // import getters from './getters';
+import { useStore } from "vuex";
 const state = {};
 export default createStore({
   state: {
     playlist: [{
+      name: "起风了",
+      id: 1330348068,
       al: {
-        id: 34678113,
-        name: "Lake Arrowhead EP",
-        pic: 109951163302931200,
-        picUrl: "http://p3.music.126.net/UQjT1X6Zn5OWW7pYsElIwg==/109951163302931194.jpg",
-        pic_str: "109951163302931194",
+        id: 74715426,
+        name: "起风了",
+        pic: 109951163699673360,
+        picUrl: "http://p4.music.126.net/diGAyEmpymX8G7JcnElncQ==/109951163699673355.jpg",
+        pic_str: "109951163699673355",
         tns: []
-      }
+      },
     }],
     playCurrentIndex: 0,
-    lyric: [] //因为歌词需要全局使用，所以放在store中
+    lyric: '', //因为歌词需要全局使用，所以放在store中
+    currentTime: 0, // 当前音乐时间
+    intervalId: 0, // 间隔id
+  },
+  getters: {
+    // 计算属性，实现歌词展示
+    lyricList: function (state) {
+      let arr = state.lyric.split(/\n/igs).map((item:any, i:any) => {
+        let min = item.slice(1, 3)
+        let sec = item.slice(4, 6)
+        let mill = item.slice(7, 10)
+        let lyric = item.slice(11, item.length)
+        let time = parseInt(mill) + parseInt(sec)*1000 + parseInt(min)*60*1000
+        console.log(min,sec,mill,lyric,time);
+        return {
+          min, sec, mill, lyric,
+          content: item,
+          time
+        }
+      })
+      return arr
+    }
   },
   mutations: {
     setPlaylist: function(state, value) {
@@ -29,17 +53,24 @@ export default createStore({
     setPlayIndex (state, val) {
       state.playCurrentIndex = val
     },
+    // 修改歌詞
     setLyric (state, value) {
+      // console.log('value', value);
       state.lyric = value
+    },
+    // 每一秒钟更新时间
+    setCurrentTime (state, value) {
+      state.currentTime = value
     }
-     
   },
   actions: {
-    // 异步获取歌词
+    // 异步获取歌词，导入方法有问题，就整个写
     async reqLyric (context, payload) {
-      let res = await getLyric(payload.id)
-      console.log(res);
-    }
+      let baseUrl = 'http://localhost:3000'
+      let res = await axios.get(`${baseUrl}/lyric?id=${payload.id}`)
+      // console.log('res', res.data.lrc.lyric)
+      context.commit('setLyric', res.data.lrc.lyric)
+    },
   },
   // getters,
 });

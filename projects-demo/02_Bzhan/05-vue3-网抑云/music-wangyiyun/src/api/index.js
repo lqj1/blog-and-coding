@@ -27,3 +27,9 @@ export function getLyric(id) {
     url: `/lyric?id=${id}`,
   });
 }
+// export default {
+//   getBanners,
+//   getMusicList,
+//   getPlayListDetail,
+//   getLyric,
+// };
