@@ -28,7 +28,7 @@
 
 <script>
 import PlayMusic from '@/components/PlayMusic.vue'
-import { computed, onMounted, ref, reactive } from 'vue'
+import { computed, onMounted, ref, reactive, onUpdated } from 'vue'
 import { useStore } from 'vuex'
 export default {
   components: {
@@ -53,6 +53,12 @@ export default {
       // console.log('playlist', playlist.value[playCurrentIndex.value].id);
       store.dispatch('reqLyric', { id: playId })
     })
+    onUpdated(() => {
+      const playlist = computed(() => store.state.playlist).value
+      const playCurrentIndex = computed(() => store.state.playCurrentIndex).value
+      playId = playlist[playCurrentIndex].id
+      store.dispatch('reqLyric', { id: playId })
+    })
     // 播放切换，初始值为暂停状态为真
     let paused = ref(true)
     // 播放器播放
@@ -74,7 +80,7 @@ export default {
     }
     // 更新时间
     const updateTime = () => {
-      console.log('currentTIme', myAudio.value.currentTime);
+      // console.log('currentTIme', myAudio.value.currentTime);
       store.state.intervalId = setInterval(() => {
         store.commit('setCurrentTime', myAudio.value.currentTime)
       }, 1000)

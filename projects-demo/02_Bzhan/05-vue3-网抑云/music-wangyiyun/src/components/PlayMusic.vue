@@ -24,18 +24,19 @@
       <img class="disc" src="@/assets/images/disc_default.png" alt="">
       <img class="play-img" :src="playDetail.al.picUrl" alt="">
     </div>
-    <div class="play-liric" v-show="lyricShow">
-      <p :class="{active:(currentTIme*1000 && currentTIme*1000<parseInt(item.min))}"
+    <div class="play-lyric" v-show="lyricShow">
+      <p :class="{active:(currentTime*1000>=item.pre && currentTime*1000<item.time)}"
         v-for="(item,i) in store.getters.lyricList" :key="i">
         {{item.lyric}}
       </p>
+      <div>{{store.state.currentTime}}</div>
     </div>
     <div class="progress"></div>
     <div class="play-footer">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-liebiaoxunhuan"></use>
       </svg>
-      <svg class="icon" aria-hidden="true">
+      <svg class="icon" aria-hidden="true" @click="preNextSong(-1)">
         <use xlink:href="#icon-shangyishoushangyige"></use>
       </svg>
       <svg v-if="paused" class="icon play" aria-hidden="true" @click="playSong">
@@ -44,7 +45,7 @@
       <svg v-else class="icon play" aria-hidden="true" @click="playSong">
         <use xlink:href="#icon-zanting1"></use>
       </svg>
-      <svg class="icon" aria-hidden="true">
+      <svg class="icon" aria-hidden="true" @click="preNextSong(1)">
         <use xlink:href="#icon-xiayigexiayishou"></use>
       </svg>
       <svg class="icon" aria-hidden="true">
@@ -56,7 +57,7 @@
 
 <script>
 // import { getLyric } from '@/api/index.js'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useStore } from 'vuex'
 export default {
   // 包括属性和方法
@@ -66,9 +67,23 @@ export default {
     // 获取store中歌词
     const store = useStore()
     const lyric = computed(() => store.state.lyric)
-    // getter中获取的歌词
-    // const lyricList = store.getters.lyricList
-    return { lyricShow, lyric, store }
+    const currentTime = computed(() => store.state.currentTime)
+    const playlist = computed(() => store.state.playlist)
+    const playCurrentIndex = computed(() => store.state.playCurrentIndex)
+    const preNextSong = (num) => {
+      // console.log(num);
+      // console.log(playlist);
+      // console.log(playCurrentIndex);
+      let index = playCurrentIndex.value + num
+      if (index < 0) {
+        index = playlist.value.length - 1
+      } else if (index == playlist.value.length) {
+        index = 0
+      }
+      // console.log('index', index);
+      store.commit('setPlayIndex', index)
+    }
+    return { lyricShow, lyric, store, currentTime, preNextSong }
   }
 }
 </script>
@@ -148,7 +163,7 @@ export default {
       top: 3.45rem;
     }
   }
-  .play-liric {
+  .play-lyric {
     position: absolute;
     width: 7.5rem;
     height: 8rem;

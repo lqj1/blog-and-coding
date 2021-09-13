@@ -28,17 +28,24 @@ export default createStore({
   getters: {
     // 计算属性，实现歌词展示
     lyricList: function (state) {
-      let arr = state.lyric.split(/\n/igs).map((item:any, i:any) => {
-        let min = item.slice(1, 3)
-        let sec = item.slice(4, 6)
-        let mill = item.slice(7, 10)
+      let arr = state.lyric.split(/\n/igs).map((item:any, i:any, arr) => {
+        let min = parseInt(item.slice(1, 3))
+        let sec = parseInt(item.slice(4, 6))
+        let mill = parseInt(item.slice(7, 10))
         let lyric = item.slice(11, item.length)
-        let time = parseInt(mill) + parseInt(sec)*1000 + parseInt(min)*60*1000
-        console.log(min,sec,mill,lyric,time);
+        let time = mill + sec*1000 + min*60*1000
+        // console.log(min,sec,mill,lyric,time);
         return {
           min, sec, mill, lyric,
           content: item,
           time
+        }
+      })
+      arr.forEach((item:any, i) => {
+        if (i===0) {
+          item.pre = 0
+        } else {
+          item.pre = arr[i-1].time
         }
       })
       return arr
@@ -71,6 +78,10 @@ export default createStore({
       // console.log('res', res.data.lrc.lyric)
       context.commit('setLyric', res.data.lrc.lyric)
     },
+    // updateTime (context) {
+    //   context.state.intervalId = setInterval(() => {
+    //     context.commit('setCurrentTime', context.state.currentTime++)
+    //   })
+    // }
   },
-  // getters,
 });
