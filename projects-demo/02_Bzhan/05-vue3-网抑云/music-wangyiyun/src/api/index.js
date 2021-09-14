@@ -27,9 +27,10 @@ export function getLyric(id) {
     url: `/lyric?id=${id}`,
   });
 }
-// export default {
-//   getBanners,
-//   getMusicList,
-//   getPlayListDetail,
-//   getLyric,
-// };
+// 搜索歌词
+export function searchMusic(keyword) {
+  return request({
+    data: keyword,
+    url: `/search?keywords=${keyword}`,
+  });
+}

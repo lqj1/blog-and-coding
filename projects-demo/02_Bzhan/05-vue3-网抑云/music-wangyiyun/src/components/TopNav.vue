@@ -11,7 +11,7 @@
       <span class="navBtn">云村</span>
       <span class="navBtn">视频</span>
     </div>
-    <div class="topRight">
+    <div class="topRight" @click="$router.push('/searchview')">
       <svg class="icon search" aria-hidden="true">
         <use xlink:href="#icon-sousuo"></use>
       </svg>

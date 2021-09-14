@@ -52,6 +52,9 @@ export default createStore({
     }
   },
   mutations: {
+    pushPlayList: function (state, value) {
+      state.playlist.push(value)
+    },
     setPlaylist: function(state, value) {
       // console.log(value);
       state.playlist = value;
