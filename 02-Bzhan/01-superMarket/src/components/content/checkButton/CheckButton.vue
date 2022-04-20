@@ -1,36 +1,39 @@
 <template>
-    <div class="check-button">
-      <div class="icon-selector" :class="{'selector-active': checked}" @click="selectItem">
-        <img src="~/assets/img/cart/tick.svg" alt="">
-      </div>
+  <div class="check-button">
+    <div class="icon-selector"
+         :class="{'selector-active': checked}"
+         @click="selectItem">
+      <img src="~/assets/img/cart/tick.svg"
+           alt="">
     </div>
+  </div>
 </template>
 
 <script>
 export default {
-	name: "CheckButton",
-    props: {
-		isChecked: {
-	        type: Boolean,
-            default: false,
-      }
-    },
-    data: function () {
-		  return {
-		    checked: this.isChecked
-      }
-    },
-    methods: {
-      selectItem: function () {
-        this.$emit('checkBtnClick')
-      }
-    },
-    watch: {
-		isChecked: function (newValue) {
-        this.checked = newValue;
-      }
+  name: "CheckButton",
+  props: {
+    isChecked: {
+      type: Boolean,
+      default: false,
     }
-	}
+  },
+  data: function () {
+    return {
+      checked: this.isChecked
+    }
+  },
+  methods: {
+    selectItem: function () {
+      this.$emit('checkBtnClick')
+    }
+  },
+  watch: {
+    isChecked: function (newValue) {
+      this.checked = newValue;
+    }
+  }
+}
 </script>
 
 <style scoped>

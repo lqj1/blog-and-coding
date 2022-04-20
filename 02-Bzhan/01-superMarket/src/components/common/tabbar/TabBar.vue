@@ -1,17 +1,17 @@
 <template>
-  <div class="tab-bar">     
-      <slot></slot>
+  <div class="tab-bar">
+    <slot></slot>
   </div>
 </template>
 
 <script>
 export default {
   name: 'TabBar',
-  data() { 
+  data () {
     return {
     }
   }
- }
+}
 </script>
 
 <style scoped>

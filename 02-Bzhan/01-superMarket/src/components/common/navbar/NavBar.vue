@@ -15,13 +15,11 @@
 <script>
 export default {
   name: "NavBar",
-  data() {
+  data () {
     return {};
   },
   computed: {
-    a() {
-
-    }
+    a () { }
   }
 };
 </script>

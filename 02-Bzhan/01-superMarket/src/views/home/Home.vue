@@ -3,17 +3,30 @@
     <nav-bar class="home-nav">
       <div slot="center">购物街</div>
     </nav-bar>
-    <tab-control class="tab-control" :titles="['流行','新款','精选']" @tabClick="tabClick" ref="tabControl1" v-show="isTabFixed" />
-    <scroll class="content" ref="scroll" :probe-type="3" @scroll="contentScroll" :pull-up-load="true" @pullingUp="loadMore">
-      <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad" />
+    <tab-control class="tab-control"
+                 :titles="['流行','新款','精选']"
+                 @tabClick="tabClick"
+                 ref="tabControl1"
+                 v-show="isTabFixed" />
+    <scroll class="content"
+            ref="scroll"
+            :probe-type="3"
+            @scroll="contentScroll"
+            :pull-up-load="true"
+            @pullingUp="loadMore">
+      <home-swiper :banners="banners"
+                   @swiperImageLoad="swiperImageLoad" />
       <recommend-view :recommends="recommends" />
       <feature-view />
-      <tab-control :titles="['流行','新款','精选']" @tabClick="tabClick" ref="tabControl2" />
+      <tab-control :titles="['流行','新款','精选']"
+                   @tabClick="tabClick"
+                   ref="tabControl2" />
       <goods-list :goods="showGoods" />
     </scroll>
 
     <!-- native监听组件元素的原生事件，不然没法监听 -->
-    <back-top @click.native="backClick" v-show="isShowBackTop" />
+    <back-top @click.native="backClick"
+              v-show="isShowBackTop" />
   </div>
 </template>
 
