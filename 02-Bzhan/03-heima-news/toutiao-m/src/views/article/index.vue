@@ -1,78 +1,85 @@
 <template>
   <div class="article-container">
     <!-- 导航栏 -->
-    <van-nav-bar class="app-nav-bar" title="文章详情" left-arrow @click-left="$router.back()" />
+    <van-nav-bar class="app-nav-bar"
+                 title="文章详情"
+                 left-arrow
+                 @click-left="$router.back()" />
     <!-- /导航栏 -->
     <!-- 正文部分 -->
     <div class="article-wrap">
-        <h1 class="title">{{article.title}}</h1>
-      <van-cell center class="user-info">
-        <div slot="title" class="name">{{article.aut_name}}</div>
+      <h1 class="title">{{article.title}}</h1>
+      <van-cell center
+                class="user-info">
+        <div slot="title"
+             class="name">{{article.aut_name}}</div>
         <!-- 知识点：fit:cover 设置图片完全覆盖 -->
-        <van-image class="avatar" slot="icon" fit="cover" src="article.aut_photo" round></van-image>
-        <div slot="label" class="pubdate">{{article.pubdate | relativeTime}}</div>
-        <van-button
-          class="follow-btn"
-          round size="small"
-          :type="article.is_followed ? 'default' : 'info'"
-          :icon="article.is_followed ? '' : 'plus'"
-          :loading="isFollowLoading"
-          @click="onFollow"
-        >
+        <van-image class="avatar"
+                   slot="icon"
+                   fit="cover"
+                   src="article.aut_photo"
+                   round></van-image>
+        <div slot="label"
+             class="pubdate">{{article.pubdate | relativeTime}}</div>
+        <van-button class="follow-btn"
+                    round
+                    size="small"
+                    :type="article.is_followed ? 'default' : 'info'"
+                    :icon="article.is_followed ? '' : 'plus'"
+                    :loading="isFollowLoading"
+                    @click="onFollow">
           {{article.is_followed ? '已关注' : '关注'}}
         </van-button>
       </van-cell>
       <!-- 知识点：类似于github的 markdown的css样式文件 -->
-      <div class="content markdown-body" v-html="article.content" ref="article-content">
+      <div class="content markdown-body"
+           v-html="article.content"
+           ref="article-content">
       </div>
       <!-- 文章评论列表 -->
-      <comment-list :source="articleId" :list="commentList" @update-total-count="totalCommentCount = $event" @reply-click="onReplyClick"></comment-list>
+      <comment-list :source="articleId"
+                    :list="commentList"
+                    @update-total-count="totalCommentCount = $event"
+                    @reply-click="onReplyClick"></comment-list>
       <!-- /文章评论列表 -->
     </div>
     <!-- /正文部分 -->
     <!-- 底部区域 -->
     <div class="article-bottom">
-      <van-button
-        class="comment-btn"
-        type="default"
-        round
-        size="small"
-        @click="isPostShow = true"
-      >写评论</van-button>
-      <van-icon
-        name="comment-o"
-        :info="totalCommentCount"
-        color="#777"
-      />
-      <van-icon
-        :color="article.is_collected? 'orange' : '#777'"
-        :name="article.is_collected? 'star' : 'star-o'"
-        @click="onCollect"
-      />
-      <van-icon
-        :name="article.attitude === 1 ? 'good-job' : 'good-job-o'"
-        :color="article.attitude === 1 ? 'hotpink' : '#777'"
-        @click="onLike"
-      />
-      <van-icon name="share" color="#777" />
+      <van-button class="comment-btn"
+                  type="default"
+                  round
+                  size="small"
+                  @click="isPostShow = true">写评论</van-button>
+      <van-icon name="comment-o"
+                :info="totalCommentCount"
+                color="#777" />
+      <van-icon :color="article.is_collected? 'orange' : '#777'"
+                :name="article.is_collected? 'star' : 'star-o'"
+                @click="onCollect" />
+      <van-icon :name="article.attitude === 1 ? 'good-job' : 'good-job-o'"
+                :color="article.attitude === 1 ? 'hotpink' : '#777'"
+                @click="onLike" />
+      <van-icon name="share"
+                color="#777" />
     </div>
     <!-- /底部区域 -->
     <!-- 发布评论 -->
-    <van-popup
-      v-model="isPostShow"
-      position="bottom"
-      :style="{ height: '30%' }"
-    >
-      <post-comment :target="articleId" @post-success="onPostSuccess" />
+    <van-popup v-model="isPostShow"
+               position="bottom"
+               :style="{ height: '30%' }">
+      <post-comment :target="articleId"
+                    @post-success="onPostSuccess" />
     </van-popup>
     <!-- /发布评论 -->
     <!-- 评论回复 -->
-    <van-popup
-      v-model="isReplyShow"
-      position="bottom"
-      :style="{ height: '60%' }"
-    >
-      <comment-reply v-if="isReplyShow" :comment="replyComment" :article-id="articleId" @close="isReplyShow = false" />
+    <van-popup v-model="isReplyShow"
+               position="bottom"
+               :style="{ height: '60%' }">
+      <comment-reply v-if="isReplyShow"
+                     :comment="replyComment"
+                     :article-id="articleId"
+                     @close="isReplyShow = false" />
     </van-popup>
     <!-- /评论回复 -->
   </div>

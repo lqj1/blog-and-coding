@@ -10,7 +10,6 @@ export default new Vuex.Store({
   state: {
     // 当前登录用户的登陆状态（token）等数据
     user: getItem(USER_KEY),
-
     cachePages: ['LayoutIndex']
   },
   mutations: {

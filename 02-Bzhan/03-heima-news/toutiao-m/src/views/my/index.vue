@@ -1,6 +1,5 @@
 <template>
   <div class="my-container">
-
     <van-cell-group v-if="user" class="my-info">
       <van-cell class="base-info" center :border="false">
         <van-image class="avatar" slot="icon" round fit="cover" :src="currentUser.photo" />
