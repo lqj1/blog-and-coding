@@ -3,7 +3,7 @@
     <!-- 头部 -->
     <app-header></app-header>
     <!-- 视频播放 -->
-    <video-play :videoInfo=""></video-play>
+    <!-- <video-play :videoInfo=""></video-play> -->
     <!-- 视频信息 -->
     <!-- 底部推荐和评论 -->
   </div>
