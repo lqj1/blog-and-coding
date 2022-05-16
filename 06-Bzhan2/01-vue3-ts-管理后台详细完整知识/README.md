@@ -1136,3 +1136,951 @@ exit({commit}) {
   })
 }
 ```
+## 设计稿制作
+### 表格
+- 主要使用 element-ui
+- layout
+  - el-row,el-col
+  - :gutter 列与列之间间隔
+  - :span 列本身占据的宽度
+- 下拉
+  - el-select,el-option
+### 弹窗
+- el-dialog 可以封装成单独的弹窗组件
+### 父子组件传参
+- 单项数据流，可以通过watch监听来修改值
+
+```html
+<el-dialog>
+  <el-form :model="form">
+    <el-form-item></el-form-item>
+  </el-form>
+  <div slot="footer" class="dialog-footer"></div>
+</el-dialog>
+```
+- 封装成如下所示
+```vue
+<!-- 父组件 -->
+<dialog-info :flag="dialog_info" @pclose="pclose"></dialog-info>
+```
+```html
+<!-- 子组件接收 -->
+<template>
+  <el-dialog :visible.sync="dialog_info" @close="close"> 
+    aaaaa
+  </el-dialog>
+</template>
+<script>
+export default {
+  name: 'dialogInfo',
+  data() {
+    return {
+      dialog_info: false
+    }
+  },
+  // 单项数据流，父级 -> 子级，props
+  // 子级 -> 父级，通过弹窗关闭事件传回值
+  props: {
+    flag: {
+      type: Boolean,
+      default: false
+    }
+  },
+  methods: {
+    close() {
+      this.dialog_info = false
+      this.$emit('pclose', false)  // 传 pclose 事件，false的值给父级，这里调用的是父组件上的 pclose
+      this.$emit('update:flag', false)  // 没有调用父级的函数处理，在不需要处理逻辑的时候可用于简单使用
+      // 此时父组件中的内容变为：
+      <dialog-info :flag="dialog_info" @pclose="pclose"></dialog-info>
+      <dialog-info :flag.sync="dialog_info"></dialog-info>
+    }
+  },
+  watch: {
+    flag: {
+      handler(newVal, oldVal) {
+        // 不能逆向数据修改，就定义新的数据，通过监听修改
+        // newVal 就是父组件传给子组件的值，因为这里监听的是 flag
+        this.dialog_info = newVal
+      }
+    }
+  }
+}
+</script>
+```
+### el-messageBox弹窗封装
+- 封装相同的代码
+#### 1.全局注册,多文件调用(注册全局方法)
+```javascript
+export default {
+  install(Vue, options) {
+    Vue.prototype.xxx = function(){
+      console.log('Plugin Test')
+    }
+  }
+}
+```
+#### 2.定义单独的方法，调用时需要引入
+```javascript
+export function xxx(value) {
+  // ...
+}
+```
+- 引入， import {xxx} from xxx
+#### 3.Vue3方法
+```javascript
+export function global() {
+  const aaa = () => {}
+  const bbb = ref('')
+  return {
+    aaa,
+    bbb
+  }
+}
+```
+- 在 utils 目录下新建global.js文件
+```javascript
+import { MessageBox } from 'element-ui'
+export default {
+  install(Vue, option) {
+    Vue.prototype.confirm = (params) => {   // 将方法放到Vue原型上
+      MessageBox.confirm(params.content, tips || '提示', {    // 传入参数，有tips就显示，否则显示 ‘提示’
+        confirmButtonText: '确定',
+        confirmButtonText: '取消',
+        type: param.type || 'warning',
+        center: true
+      }).then(()=>{
+        param.fn && param.fn()
+      }).catch(()=>{
+        root.$message({
+          type: 'info'
+          message: '已取消删除'
+        })
+      })
+    }
+  }
+}
+
+// 定义方法
+const deleteAll = ()=>{
+  root.confirm({
+    content:'确认删除，确认无法恢复！',
+    type: 'success',
+    fn: confirmDelete  // 不能加引号
+  })
+}
+const confirmDelete = ()=>{
+   root.$message({
+    type: 'info'
+    message: '已删除'
+   })
+}
+```
+- 在main.js中注册自定义的全局方法
+  - import global from '@/utils/global.js'
+  - Vue.use(global)  // 注册代码
+- 引入之后，就可以在其他文件中使用
+  - vue2: this.confirm({ content: '参数:删除全部,是否继续?', tips: '提示', fn: 'confirmDelete' })
+  - vue3: 解构setup中的context之后，使用 root.confirm()
+
+
+### 信息管理模块
+#### 接口封装
+- 方法一：在 src/api 下新建 common.js文件
+```javascript
+import { GetCategory } from '@/api/news'
+export function common() {
+  const category = reactive({
+    item: []
+  })
+  const getInfoCagegory_one = () => {
+    GetCategory({
+      // 参数
+    }).then(res => {
+      console.log('common方法')
+      category.item = res.data.data
+    }).catch(err => {
+
+    })
+  }
+  return {
+    getInfoCategory,
+    category
+  }
+}
+```
+- 方法二：将方法放到 vuex 中，在之前建立的 vuex/modules 下新建 common.js 文件
+```javascript
+import { GetCategory } from '@/api/news'
+const actions = {
+  // 可以回调处理事情
+  getInfoCategory_two(content, res) {
+    return new Promise((resolve, reject) => {
+      GetCategory({
+        // 参数
+      }).then((res)=>{
+        resolve(res)
+      }).catch(err=>{
+        reject(err)
+      })
+    })
+  }
+}
+export default {
+  namespaced: true,
+  actions
+}
+```
+
+- 方法一和二 调用
+```javascript
+export default {
+  name: 'infoIndex',
+  components: { DialogInfo },
+  setup(props, {root}) {
+    let data = reactive({
+      dialog_info: '',
+      search_key: ''
+    })
+
+    const { getInfoCategory_one } = common()
+    const { str:aaa, confirm: cAAA } = global()
+    /* 
+     * 搜索关键字
+     */
+    const search_option = reactive([
+      { value: 'id', label: 'id' },
+      { value: 'title', label: '标题' }
+    ])
+    /**
+     * 数据
+     */
+    const serach_key = ref('id')
+    const category_val = ref('')
+    const options = reactive({
+      category: []
+    })
+    /* 
+     * 页码
+     */
+    const page = reactive({
+      pageNumber: 1,
+      pageSize: 10
+    })
+    /* 
+     * 表格数据
+     */
+    const table_data = reactive({
+      item: []
+    })
+    /* vue2.0 方法
+     */
+    const confirmDelete = () => {
+      console.log(value)
+    }
+    const handleCurrentChange = (val) => {
+      page.pageNumber = val
+      getList
+    }
+    const getList = () => {
+      let requestData = {
+        categoryId: '',
+        startTime: '',
+        endTime: '',
+        title: '',
+        id: '',
+        pageNum: page.pageNumber,
+        pageSize: page.pageSize
+      }
+    }
+
+    onMounted(()=>{
+      getInfoCategory_one()  // 方法一
+      // 方法二
+      root.$store.dispatch('common/getInfoCategory_two').then(res=>{
+        options.category = res 
+      })
+    })
+    return {
+      // ref
+      serach_key,category_val
+      // reactive
+      options
+    }
+  }
+}
+```
+#### el-table
+```html
+<el-table :data="table_data_item" border v-loading="loadingData" style="width:100%">
+  <el-table-column type="selection"></el-table-column>
+  <el-table-column prop="categoryId" label="类型" width="130" :formatter="toCategory"></el-table-column>
+</el-table>
+```
+- el-table 中使用 :formatter 来格式化列的类型，比如将时间戳转换为年月日等
+```javascrpt
+const toCategory = (row) => {
+  let categoryId = row.categoryId
+  let aaa = options.category.filter(item => item.id = row.categoryId)
+}
+```
+#### template
+- 如果需要在表格中写新的 html 标签，则需要使用template
+```html
+<el-table :data="table_data.item" border v-loading="loadingData" style="width: 100%">
+  <el-table-column label="操作">
+    <template slot-scope="scope">
+      <el-button type="danger" size="mini" @click="deleteItem(scope.row_id)">删除</el-button>
+      <el-button type="success" size="mini" @click="dialog_info()">编辑 </el-button>
+    </template>
+  </el-table-column>
+</el-table>
+```
+
+#### 按钮组统一函数
+```html
+<div>
+  <el-button size="mini" type="danger" @click="editCategory({data: firstItem, type: 'category_first_edit'})" round>编辑1</el-button>
+  <el-button size="mini" type="success" @click="editCategory({data: firstItem, type: 'category_second_edit'})" round>编辑2</el-button>
+  <el-button size="mini" type="danger" @click="editCategory({data: firstItem, type: 'category_third_edit'})" round>编辑3</el-button>
+</div>
+```
+```javascript
+const submit = () => {
+  if(submit_button_type.value == 'category_first_add') {
+    addFirstCategory();
+  }
+  if(submit_button_type.value == 'category_second_add') {
+    addSecondCategory();
+  }
+  if(submit_button_type.value == 'category_third_add') {
+    addThirdCategory();
+  }
+}
+```
+### 原型查看
+- 原型图的制作，axure
+
+### router路由跳转
+```javascript
+{
+  path: '/infoDetailed',
+  name: 'InfoDetailed',
+  hidden: true,   // true的话，标签页不显示
+  meta: {
+    name: '信息详情'
+  },
+  component: ()=>import('../views/Info/detailed.vue')
+}
+```
+- router 的 vue 页面
+```html
+<el-menu>
+  <template v-for="(item,index) in routers">
+    <el-submenu v-if="!item.hidden" :key="item.id" :index="index+''">
+      <!-- 一级菜单 -->
+      <template slot="title">
+        <span slot="title">{{item.meta.name}}</span>       
+      </template>
+      <!-- 子级菜单 -->
+      <!-- 因为 v-for 和 v-if不能放在一个标签，所以使用template -->
+      <template v-for"subItem in item.children" >
+        <!-- 判断路由中的 hidden，根据真假决定标签是否显示 -->
+        <el-menu-item v-if="!subItem.hidden" :key="subItem.id" :index="subItem.path">
+          {{subItem.meta.name}}
+        </el-menu-item>
+      </template>
+    </el-submenu>
+  </template>
+</el-menu>
+```
+- 跳转代码
+```html
+<el-table-column label="操作">
+  <template slot-scope="scope">
+      <!-- 当有多个按钮时，为了时按钮之间有间隔，需要将 router-link 放在 el-button里面 -->
+      <el-button>删除</el-button>
+      <el-button type="success" size="mini">
+        <router-link :to="{name: 'InfoDetailed'}">
+          编辑跳转
+        </router-link>
+      </el-button>
+  </template>
+</el-table-column>
+```
+### 5种路由传参方式
+#### 1.明文传参（URL会显示出传递的参数）
+- 优势：页面刷新参数不会丢失，劣势：参数公开
+- HTML跳转
+```html
+<router-link :to="{name:xxx, query:{page: 1, code: 888}}"></router-link>
+```
+- JS跳转
+```javascript
+this.$router.push({
+  name:'xxx',
+  query: {
+    page: 1,
+    code: '888'
+  }
+})
+//接收： 
+this.$route.query.page
+```
+#### 2.密文传参（URL路径不会显示传递的参数）
+- 优势：参数不显示，劣势：页面刷新参数消失
+- HTML跳转
+```html
+<router-link :to="{name:xxx, params:{page: 1, code: 888}}"></router-link>
+```
+- JS跳转
+```javascript
+this.$router.push({
+  name:'xxx',
+  params: {
+    page: 1,
+    code: '888'
+  }
+})
+// 接收
+this.$route.params.page
+```
+
+#### 3.冒号的形式传递参数
+- 优势：页面刷新时参数不会丢失，劣势：需要一一-配置
+```javascript
+{
+  path: 'infoDetailed/:newsId/:newsTitle',
+  name: 'InfoDetailed',
+  meta: {
+    name: '信息详情'
+  },
+  component: () => import('../views/info/category.vue')
+}
+// 接收方式
+{{$route.params.newsId}}
+{{$route.params.newsTitle}}
+```
+- 在方法中写法如下：
+```javascript
+const detailed = (data) => {
+  root.$router.push({
+    path: `/InfoDetailed/${data.id}/${data.title}`
+  })
+}
+```
+### 4.Vuex配合HTML5存储
+- store 目录下 index.js 文件内容
+
+```javascript
+import Vue from 'vue'
+import Vuex from 'vuex'
+Vue.use(Vuex)
+import app from './modules/app'
+import login from './modules/app'
+import common from './modules/common'
+import infoDetailed from './modules/infoDetailed'
+export default new Vuex.Store({
+  modules: {
+    // 这里四个模块对应四个文件
+    app,
+    login,
+    common,
+    infoDetailed
+  }
+})
+```
+
+- store/modules 下的 infoDetailed.js 文件内容
+```javascript
+const state = {
+  /* 
+   * 已经储存了值，不刷新页面的时候，值就一直存在vuex
+   * 刷新页面之后，就会取 session 的值，赋值给变量
+   */
+  id: '' || sessionStorage.getItem('infoId'),
+  title: '' || sessionStorage.getItem('infoTitle')
+}
+const getters = {
+  infoId: state => state.id
+  infoTitle: state => state.title
+}
+const mutations = {    // 必须，同步，没有回调处理事情
+  SET_ID(state, value) {
+    state.id = value
+    // html5 本地存储
+    sessionStorage.setItem('infoId', JSON.stringify(value))
+  },
+  SET_TITLE(state, value) {
+    state.title = value
+    // html5 本地存储
+    sessionStorage.setItem('infoTitle', JSON.stringify(value))
+  }
+}
+const actions = {   // 可以回调处理事情
+
+}
+export default {
+  namespaced: true,
+  state,
+  getters,
+  mutations,
+  actions
+}
+```
+
+- 获取路由id和title
+```vue
+<template>
+</template>
+<script>
+import {reactive,ref,watch,onMounted} from 'vue'
+export default {
+  name: 'infoDetailed',
+  setup(props, {root}) {
+    // params存的参数，刷新之后会消失，所以刷新之后会执行这里，但是已经取不到 params 中的值了，
+    let id = root.$route.params.id;
+    let title = root.$route.params.title
+
+    // vuex的mutations取值
+    // 刷新之后，设置的值就是 undefined
+    root.$store.commit('infoDetailed/SET_ID',id)  // 这里需要添加 命名空间
+    root.$store.commit('infoDetailed/SET_TITLE',title)
+    
+    // vuex的getter取值
+    // 刷新之后，这里去取了getters中，getters又去取了state中的值，为 undefined
+    console.log(root.$store.getters('infoDetailed/infoId'))
+    console.log(root.$store.getters('infoDetailed/infoTitle'))
+  }
+}
+</script>
+```
+#### 刷新丢失参数问题解决
+- 将值存在路由跳转之前
+```javascript
+const detailed = (data) => {
+  // 预先存值
+  root.$store.commit('infoDetailed/SET_ID',data.id)
+  root.$store.commit('infoDetailed/SET_TITLE',data.title)
+  // 跳转页面
+  root.$router.push({
+    name: 'InfoDetailed',
+    params: {
+      id: data.id,
+      title: data.title
+    }
+  })
+}
+```
+- 再次获取路由跳转的 id 和 title
+```vue
+<template>
+</template>
+<script>
+import {reactive,ref,watch,onMounted} from 'vue'
+export default {
+  name: 'infoDetailed',
+  setup(props, {root}) {
+    // params存的参数，刷新之后会消失，所以刷新之后会执行这里，但是已经取不到 params 中的值了，
+    let id = root.$route.params.id;
+    let title = root.$route.params.title
+
+    // vuex的mutations取值
+    // 刷新之后，设置的值就是 undefined
+    root.$store.commit('infoDetailed/SET_ID',id)  // 这里需要添加 命名空间
+    root.$store.commit('infoDetailed/SET_TITLE',title)
+    
+    // vuex的getter取值
+    // 刷新之后，这里去取了getters中，getters又去取了state中的值，为 undefined
+    console.log(root.$store.getters('infoDetailed/infoId'))
+    console.log(root.$store.getters('infoDetailed/infoTitle'))
+  }
+}
+</script>
+```
+- 优化:vuex结合HTML5本地存储
+```vue
+<template>
+</template>
+<script>
+import {reactive,ref,watch,onMounted} from 'vue'
+export default {
+  name: 'infoDetailed',
+  setup(props, {root}) {
+    // 取 router 和 session中的值，store中getters定义了 id: '' || sessionStorage.getItem('infoId'),
+    let id = root.$route.params.id || root.$store.getters['infoDetailed/infoId'];
+    let title = root.$route.params.title || root.$store.getters['infoDetailed/infoTitle'];
+
+    // vuex的mutations取值
+    // 刷新之后，设置的值就是 undefined
+    root.$store.commit('infoDetailed/SET_ID',id)  // 这里需要添加 命名空间
+    root.$store.commit('infoDetailed/SET_TITLE',title)
+    
+    // vuex的getter取值
+    // 刷新之后，这里去取了getters中，getters又去取了state中的值，为 undefined
+    console.log(root.$store.getters('infoDetailed/infoId'))
+    console.log(root.$store.getters('infoDetailed/infoTitle'))
+  }
+}
+</script>
+```
+### 5.新窗口打开
+- 优势：参数不显示，劣势：稍微有点大材小用（解决第二种参数丢失的问题）
+```html
+<router-link tag="a"
+  target="_blank" :to="{name:'searchGoods', params:{catId:0},query:{keywords:'手机'"}}>
+>热门好货</router-link>
+```
+```javascript
+let routeData = this.$router.resolve{{
+  name: 'searchGoods',
+  query: params,
+  params: {catId: params.catId}
+}}
+window.open(routeData.href,'_blank')
+```
+#### 使用某个字段来决定是否存session
+```javascript
+const detailed = (data) => {
+  root.$store.commit('infoDetailed/SET_ID',id)  // 这里需要添加 命名空间
+  root.$store.commit('infoDetailed/SET_TITLE',title)
+  // 通过下面的方法来取代上面，这样就可以不需要 SET_ID 和 SET_TITLE 方法了
+  root.$store.commit('infoDetailed/UPDATE_STATE_VALUE', {
+    id: {
+      value: data.id,
+      sessionKey: 'infoId',
+      session: true
+    },
+    title: {
+      value: data.title,
+      sessionKey: 'infoTitle'
+    }
+  })
+}
+```
+- 在store中写相应的方法
+```javascript
+const mutations = {
+  UPDATE_STATE_VALUE(state, params) {
+    for(let key in params) {
+      // 储存值
+      state[key] = params[key].value
+      // 判断是否存储 session
+      if(params[key].session) {
+        sessionStorage.setItem(params[key].sessionKey, params[key].value)
+      }
+    }
+  }
+}
+```
+### 富文本编辑器
+- npm install vue-quill-editor --save
+
+### 七牛云缩略图存储
+- 将上传的图片存储到七牛云存储
+
+### element-ui二次封装
+- 如将上传图片的代码封装成一个 vue 文件的组件，然后存放到 components/UploadImg 下的 index.vue 文件中
+```vue
+<template>
+</template>
+<script>
+import { reactive, ref, watch, onMounted } from 'vue'
+export default {
+  /**
+   * 1. 组件的过程要做什么（显示默认的图片，选择图片后渲染自身图片）
+   * 2. 最终结果要做什么（返回选择后的图片路径）
+   */
+  name: 'uploadImg',
+  setup(props, {root}) {
+    const data = reactive({
+      uploadKey: {
+        token: '',
+        key: ''
+      }
+    })
+    const getQiniuToken = () => {
+      let requestData = {
+        'accessKey': 'aaaaa',
+        'secretKey': 'bbbbb'
+        'buckety': 'ccccc'
+      }
+      QiniuToken(requestData).then(res => {
+        data.uploadKey.token = res.data.data
+      })
+    }
+    /**
+     * 监听
+     */
+    watch(() => props.imgUrl, (value) => {
+      console.log(value)
+      data.image = value
+    })
+    onMounted( () => {
+      getQiniuToken()
+    })
+    return {
+      data, getQiniuToken
+    }
+  }
+
+}
+</script>
+```
+#### 必须有 sync 修饰符才可以通过上传图片，反向修改图片
+```vue
+<el-form-item>
+  <UploadImg :imgUrl.sync="form.imgUrl">
+</el-form-item>
+```
+
+### 组件化开发
+- 组件化开发优点：高内聚、低耦合
+#### 组件大致的类
+1. 页面级别的类
+2. 业务上可复用的基础组件
+3. 与业务无关的独立组件
+#### 组件三要素
+- Prop: 用于定义组件的属性（组件属性参数）
+- Event: 自定义事件用于触发组件的事件（经常会回调父组件方法）
+- Slot: 用于组件功能的扩展，（插槽），父组件的内容传入子组件，在子组件中显示
+
+#### 全局组件与局部组件
+```javascript
+Vue.component('child-component', {
+  template: `
+    <div>
+      <slot>
+        <p>如果父组件没有插入内容，我将作为默认出现</p>
+      </slot>
+    </div>
+  `
+})
+```
+- 注册的全局组件，vue中任务 .vue页面都会挂载此注册的注册，有点浪费资源
+
+#### 局部组件
+```javascript
+import User from './components/Users'
+```
+- 按需加载，只在有需要的 .vue页面中引用，不浪费资源，就是有点麻烦
+
+### vue生命周期
+#### vue2 生命周期
+```javascript
+export default {
+  name: '',
+  data() {
+    return {
+      message: 'vue的生命周期'
+    }
+  },
+  beforeCreate: function() {
+    console.group('beforeCreate创建前状态')
+    this.$el     // undefined
+    this.$data   // undefined
+    this.message // undefined
+  },
+  created: function() {
+    console.group('created创建完毕状态')
+    this.$el     // undefined，created还未挂载dom节点
+    this.$data   // 已被初始化
+    this.message // 已被初始化
+  },
+  beforeMounte: function() {
+    console.group('beforeMount挂载前状态')
+    this.$el     // 已被初始化
+    this.$data   // 已被初始化
+    this.message // 已被初始化
+  },
+  mounted: function() { 
+    console.group('mounted挂载结束状态')
+    this.$el     // 已被初始化
+    this.$data   // 已被初始化
+    this.message // 已被初始化
+  }
+}
+```
+- beforeUpdate: 状态更新之前执行，此时data中的状态是最新的，但界面还没开始渲染，是旧数据
+- updated: 更新完成，状态更新完成后执行，此时界面显示data的最新数据，即界面已被渲染
+- beforeDestroy: 销毁前，实例准备销毁，但还没有被销毁，实例属性方法还可以用
+- destroyed: 实例已销毁，所有内容均不可使用
+- activated, devicated  组件生命周期，挂载和卸载调用
+
+#### vue3生命周期
+- setup():开始创建组件之前，在beoreCreate和create之前执行，创建的是data和methods
+- onBeforeMount():组件挂载到节点上之前执行的函数
+- onMounted():组件挂载完成后执行的函数
+- onBeforeUpdate():组件更新之前执行的函数
+- onUpdated():组件更新完成之后执行的函数
+- onBeforeUnmount(): 组件卸载之前执行的函数
+- onUnmounted(): 组件卸载完成之后执行的函数
+- onActivated(): 被包含在<keep-alive> 中的组件，会多出两个生命周期钩子函数。被激活时执行。
+- onDeactivated(): 比如从A组件，切换到B组件，A组件消失时执行。
+- onErrorCaptured(): 当捕获一个来自子孙组件的异常时激活钩子函数
+
+#### vue2,vue3生命周期关系
+```
+beforeCreate -> setup
+created -> setup
+beforeMount -> onBeforeMount
+mounted -> onMounted
+beforeUpdate -> onBeforeUpdate
+updated -> onUpdated
+beforeDestroy -> onBeforeUnmount
+destroyed -> onUnmounted
+activated -> onActivated
+errorCaptured -> onErrorCapture
+```
+
+### v-slot插槽
+- 父组件传内容到子组件显示
+#### 匿名插槽
+1. 插槽1-匿名插槽，没有指定某一个，全部都显示
+```
+[
+  {
+    label: '手机号',
+    field: 'phone'
+  }
+  {
+    label: '地区',
+    field: 'address'
+  },
+  {
+    label: '禁启用状态',
+    field: 'status',
+    columnType: 'slot',
+    slotName: 'status'
+  },
+  {
+    label: '禁启用状态',
+    field: 'status',
+    columnType: 'function, images'
+  }
+]
+```
+- 使用 columnType 来定义每一列的属性
+```html
+<el-table>
+  <template v-for="item in data.tableConfig.tHead">
+    <!-- v-slot -->
+    <el-table-colunm v-if="item.columnType==='slot'">
+      <template slot-scope="scope" >
+        <!-- 放多少个 slot，显示多少个元素 -->
+        <slot></slot>
+        <slot></slot>
+        <!-- 具名插槽 -->
+        <slot name="status"></slot> 
+      </template>
+    </el-table-colunm>
+    <!-- 文本数据渲染 -->
+    <el-table-column :prop="item.field" :key="item.field" v-else>
+       <!-- 在标准的标签中添加额外的html标签，则需要添加 template -->
+       <template slot-scope="scope">
+        <el-button type="danger" size="mini" @click="deleteItem(scope.row.id)">删除</el-button>
+        <el-button type="danger" size="mini" @click="addItem(scope.row.id)">新增</el-button>
+      </template>
+    </el-table-column>
+  </template>
+</el-table>
+```
+- 使用 element-ui 的时候，如果要在标准的标签中添加额外的html标签，则需要添加 template
+
+#### 具名插槽
+2. 插槽2-具名插槽，指定插槽显示内容
+```html
+<template>
+  <!-- 放多少个 slot，显示多少个元素 -->
+  <slot></slot>
+  <slot></slot>
+  <!-- 具名插槽 -->
+  <slot name="status"></slot> 
+</template>
+```
+- 父组件中的写法如下:
+```html
+<TabVue :config="data.configTable">
+  <!-- 使用 #+插槽的名字 即可  -->
+  <template #status> 
+  </template>
+</TabVue>
+```
+- 动态化绑定 slotName
+```html
+<template>
+  <!-- 放多少个 slot，显示多少个元素 -->
+  <slot></slot>
+  <slot></slot>
+  <!-- 具名插槽 -->
+  <slot :name="item.slotName"></slot> 
+</template>
+```
+#### 作用域插槽
+3. 插槽3-作用域插槽，可以进行数据绑定，父子组件进行通信
+- 前两种插槽没有办法进行数据交互
+```html
+<template slot-scope="scope" >
+  <!-- 放多少个 slot，显示多少个元素 -->
+  <!-- 具名插槽 -->
+  <slot :name="item.slotName" :data="scope.row"></slot> 
+</template>
+```
+- 父组件中接收数据
+```html
+<TabVue :config="data.configTable">
+  <!-- 在子组件中，有两个 slot 来对应下面的 template -->
+  <template v-slot:status="slotData"> 
+    {{slotData.data.name}}
+  </template>
+  <template v-slot:operation="slotData">
+    <el-button type="danger"></el-button>
+    <el-button type="info"></el-button>
+  </template>
+</TabVue>
+```
+
+- 初始化的数据，不需要监听，可以在挂载之前处理好
+
+### 业务逻辑拆分组合
+- 将和分页请求相关的内容写到一个文件中
+```javascript
+import { reactive } from 'vue'
+export function paginationHook() {
+  const pageData = reactive({
+    currentPage: 1, 
+    pageSize: 10,
+    total: 0,
+    pageSize: [10,20,50,100]
+  })
+  // 统计数据汇总
+  const totalCount = (val) => pageData.total = val
+  const handleSizeChange = (val) => {
+    pageData.pageSize = val
+  }
+  const handleCurrentChange = (val) => {
+    pageData.currentPage = val
+  }
+  // 数据渲染
+  watch([
+    () => tableData.item,
+    () => tableData.total
+  ], ([tableData, total]) => {
+    data.tableData = tableData
+    totalCount(total)
+  })
+  // 页码监听
+  watch([
+    () => pageData.currentPage,
+    () => pageData.pageSize
+  ],(currentPage, pageSize) => {
+     console.log(currentPage)
+     console.log(pageSize)
+  })
+  return {
+    pageData,
+    handleSizeChange,
+    handleCurrentChange
+  }
+}
+```
