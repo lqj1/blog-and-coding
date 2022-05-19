@@ -1363,9 +1363,11 @@ export default {
     /* 
      * 页码
      */
-    const page = reactive({
+    const pageData = reactive({
       pageNumber: 1,
-      pageSize: 10
+      pageSize: 10,
+      total: 0,
+      pageSize: [2,20,50,100]
     })
     /* 
      * 表格数据
@@ -2084,3 +2086,543 @@ export function paginationHook() {
   }
 }
 ```
+### vue2 mixins混入、按需混入、全局混入
+#### 什么是混入
+- 混入是一种分发vue组件中可复用功能的非常灵活的方式，混入对象可以包含任意组件选项，当组件使用混入对象时，所有混入对象的选项将被混入该组件本身的选项
+- 混入方式
+  - 组件按需混入
+  - 全局混入
+- 定义一个混入对象js
+```javascript
+var myMixin = {
+  created: function() {
+    this.hello()
+  },
+  methods: {
+    hello: function() {
+      console.log('hello from mixin')
+    }
+  }
+}
+```
+- 定义一个使用混入对象的组件
+```javascript
+var Component = Vue.extend({
+  mixins: [myMixin]
+})
+```
+#### 混入例子
+- 在 src/mixins 目录下新建文件 tableLoadData.js
+```javascript
+let tableLoadData = {
+  data() {
+
+  },
+  created() {
+
+  },
+  mounted() {
+
+  },
+  methods: {
+
+  }
+}
+export default tableLoadData;
+```
+- 在 index.vue 中引入
+```vue
+<script>
+import tableLoadData from '@/mixins/tableLoadData'
+import pagination from '@/mixins/pagination'
+export default {
+  name: 'tableVue',
+  mixins: [tableLoadData]
+  data() {
+    return {
+      tableConfig: {
+        selection: true,
+        tHead: []
+        ...
+      }
+    }
+  },
+  mounted() {
+    console.log('这里是组件对象')
+  }
+}  
+</script>
+```
+
+- 选项合并
+  - 1. 混入的data中，键名相同，则读取组件中的键名，反之读取混入键名，【组件中的data优先级比混入的高】
+  - 2. 钩子：同名钩子函数将混合为一个数组，因为都将被调用，混入对象的钩子将在组件自身钩子之前调用
+    - 钩子函数包括：data、mounted等，有括号的
+    - 比如混入中和组件中都有 mounted 方法，则两个mounted中的方法都会被调用，而混入mounted中的先调用，然后调用组件中的
+  - 3. 值为对象的混入：如 methods.components等，选项会被合并，组件对象覆盖混入对象
+    - 对象的混入包括 methods，components，props等没有括号的
+    - 【组件的优先级更高，会覆盖混入中的对象】
+
+- 全局引入
+  - import Router from 'vue-router'
+  - Vue.use(Router)
+  - 谨慎使用，会影响 Vue 实例（包括第三方组件）
+
+- 全局混入
+  - immediate: true
+  - deep: true
+
+#### toRefs
+  - ...toRefs(data)  // 把对象类型转为基础数据类型，可进行解构
+  - 转成基础数据类型之后，传入组件中，如果有使用，或者需要监听，则需要带上 value，类似于 ref数据类型， data.value
+### 数据引用类型
+  - 一条线上的东西
+#### 深浅拷贝
+- 深拷贝 JSON.stringify(requestData)
+  - 将JSON对象转成字符串，然后将数据从那条线上脱离出来，不受最开始的引用数据的影响 
+- 浅拷贝 Object.assign({},data.form)
+  - 拷贝出来就是一个对象
+- 深拷贝 【对象丢失】的问题
+  - 对于下面的代码，深拷贝之后只会保留 ccc，前面三种都会丢失 
+```javascript
+let test = {
+  fun: function(){},
+  aaa: undefined,
+  sym: Symbol(),
+  ccc: 'aa'
+}
+```
+### 组件通讯 props,emit,.sync
+#### 父子组件通信
+- A.vue（父组件）
+```vue
+<template>
+  <B flag.sync="100" @doShow="show">  <!-- data 是属性 -->
+</template>
+<script>
+export default {
+  setup(props) {
+    const show = (number) => {
+      // 子组件传过来的参数为 100
+      console.log(number)
+    }
+    return {
+      show
+    }
+  }
+}
+</script>
+```
+- B.vue（子组件）
+```vue
+<template>
+  <div>{{data}}</div>
+</template>
+<script>
+export default {
+  props: {
+    flag: {
+      type: String,
+      default: ""
+    }
+  }
+  setup() {
+    emit("doShow", 100)  // 方法：传给父组件方法，100 为参数
+    emit("update:flag", 111)  // 属性：使用 data 反向处理父组件 sync 的值
+  }
+}
+</script>
+```
+- emit 可以放在方法中，去调用
+#### 中央事件总线
+- 在 utils 目录下新建 bus.js文件
+```javascript
+import Vue from 'vue'
+export default new Vue()
+// 调用事件
+Bus.$emit('getTarget', 1111)
+// 注册事件
+Bus.$on("getTarget', target=>{
+  console.log(target)  // 1111
+})
+```
+#### $attr,$listeners
+```javascript
+// 父组件
+// 子组件
+<A aaa="10" bb="20" />   // 接收方式: attrs
+// 孙组件
+  <B v-bind="$attrs" />  // 接收方式: attrs 
+// 隔代组件
+    <C v-bind="$attrs" />   // 接收方式: attrs
+```
+
+```javascript
+// 父组件
+// 子组件
+<A v-on:upRocket="receiveRocket" />   // 接收方式: v-on
+// 孙组件
+<B v-bind="v-on='$listeners'" />      // 接收方式: $listeners
+// 隔代组价
+<C v-bind="$attrs" />  emit('upRocket')
+```
+- 通过props接收的相同名称的属性，将不被读取（重名不被处理）
+#### provide,inject(跨组件之间通信)
+```javascript
+// 注册
+setup(props, {root, refs}) {
+  // 定义一个aa，传递对象
+  provide('aa', {
+    a: 'a',
+    b: 'b'
+  })
+}
+// 接收
+setup(props, {emit, attrs}) {
+  const aa_value = inject('aa')
+}
+```
+#### $parent,$children,ref
+### 动态路由
+```javascript
+import router from './index'
+import store from './store/index'
+import { getToken, removeToken, removeUserName } from '@/utils/app'
+const whiteRouter = ['/login']  // indexOf方法，判断数组中是否存在指定的某个对象，如果不存在，则返回-1，路由白名单
+// 路由守卫
+router.beforeEach((to,from,next)=>{
+  if(getToken()) {
+    if(to.path === '/login') {
+      removeToken();
+      removeUserName();
+      store.commit('app/SET_TOKEN', '')
+      store.commit('app/SET_USERNAME', '')
+      next()
+    } else {
+      // 获取用户角色
+      // 动态分配路由权限
+      /**
+       * 1. 什么时候处理动态路由
+       * 2. 什么条件处理
+       */
+      if(store.getters['permission/roles'].length === 0) {
+        store.dispatch('permission/getRoles').then(res => {
+          // 获取返回的角色
+          console.log(res)
+          let roles = res   // 获取角色
+          store.dispatch('permission/createRouter', roles).then(res => {  // 传参
+            let addRouters = store.getters('permission.addRouters')  // 获取匹配的路由
+            let allRouters = store.getters('permission.allRouters')  // 获取匹配的路由
+            // 路由更新
+            router.options.routes = allRouters;
+            // 添加动态路由
+            router.addRoutes(addRouters)
+            next({...to, replace: true})
+          })
+        })   // 异步调用 获取角色
+      } else { 
+        next()
+      }
+    }
+    /**
+     * 1. to = /console
+     * 2. to = /index
+     */
+    // 路由动态添加，分配菜单，每个月色分配不同的菜单
+  } else {
+    if(whiteRouter.indexOf(to.path) !== -1) {
+      next()   // to
+    } else {
+      next('/login')
+    }
+    /**
+     * 1. 直接进入index的时候，参数to被改变成了 '/index'，触发路由指向，就会跑beforeEach
+     * 2. 再一次 next 指向了 login， 再次发生路由指向，再跑 beforeEach，参数的to被改变成了 '/login'
+     * 3. 白名单判断存在，则直接执行 next()，因为没有参数，所有不会再次 beforeEach
+     */
+  }
+})
+```
+```javascript
+// permission.js   store中的一个模块
+import { defaultRouterMap, asyncRouterMap } from '@/router'   // 引入默认路由
+const state = {
+  roles: [],
+  allRouters: defaultRouterMap,
+  addRouters: []
+}
+const getters = {
+  roles: state => state.roles
+  allRouters: state => state.allRouters  // 所有路由
+  addRouters: state => state.addRouters  // 匹配的路由
+}
+const mutations = {
+  SET_ROLES(state, value) {
+    state.roles = value
+  }
+  SET_ROUTER(state, routers) {
+    state.addRouters = router
+    state.allRouters = defaultRouterMap.concat(routers)
+  }
+}
+const actions = {
+  // 可以回调处理事情
+  getRoles({commit}, requestData) {
+    return new Promise((resolve, reject) => {
+      getUserRole().then(res=> {
+        let role = res.data.data
+        commit('SET_ROLES', role)
+        resolve(role)  // 返回角色
+      })
+    })
+  }
+  // 创建动态路由
+  // 数据从 router/index.js 文件中得到
+  createRouter({commit}, data) {  // data 是调用store中方法传进来的参数
+    return new Promise((resolve, reject) => {
+      // console.log(data)
+      let role = data
+      // defaultRouterMap, asyncRouterMap  引入的默认路由
+      const addRouters = asyncRouterMap.filter(item => {
+        console.log(item)
+        // es6 includes 匹配数组中是否有想要的值
+        // [3,5,10].includes(5)
+        if(role.includes(item.meta.system)) {   // 判断传入的路由是否包含有 配置的默认中的某个标签，有的话，将当前路由返回
+          return item
+        }
+      })
+      console.log(addRouters)
+      // 更新路由
+      commit('SET_ROUTER', addRouters)
+      resolve()
+    })
+  }
+}
+```
+### 自定义指令
+```javascript
+Vue.directive('btnPre', {
+  // 父级未渲染
+  bind: function(el, bingind, vnode) {   // 只调用一次，指令第一次绑定到元素的时候调用，用这个钩子可以定义一个绑定时执行一次的初始化动作
+    // el就是绑定的对象
+    // bingind
+    // 操作dom
+    if(bingind.def.hasBtnPer(bingind.value)) {       // def 自定义函数，接收到返回的权限是真，就做后面的操作
+      el.className = el.className + 'show-button'
+    }
+  },
+  // 操作父节点
+  inserted: function() {    // 被绑定的元素插入 父节点的时候 调用（父节点存在即可，不必存在document中）
+    console.log('2-insert')
+  },
+  update: function() {      // 被绑定的元素所在的模板更新时调用，而且无论绑定值是否有变化，通过比较更新前后的绑定值，忽略不必要的模板更新
+    console.log('2-update')
+  },
+  componentUpdated: function () {   // 被绑定的元素所在的模板完成一次更新周期的时候调用
+    console.log('4-componentUpdated')
+  }
+  unbind: function() {
+    console.log('5-unbind')
+  },
+  hasBtnPer: function(permission) {
+    const button = store.getters('app/buttonPermission')    // 请求到的数据权限
+    return button.indexOf(permission) !== -1    // 如果是有权限，就返回
+  }
+})
+```
+- 使用
+```javascript
+<el-table>
+  <el-table-column>
+    <template>
+      <el-button>删除</el-button>
+      <el-button v-btnPre="'info:del'">自定义指令</el-button>
+    </template>
+  </el-table-column>
+</el-table>
+```
+
+### keep-alive缓存
+```html
+<keep-alive include="infoIndex">  <!-- 只有infoIndex会被缓存 --->
+  <!-- 需要缓存 -->
+  <router-view v-if="$router.meta.keepAlive"></router-view>
+</keep-alive>
+<router-view v-if="!$router.meta.keepAlive"></router-view>
+```
+```javascript
+// router
+children: [
+  path: '/infoIndex',
+  name: 'infoIndex',
+  meta: {
+    keepAlive: true,
+    role: ['sale','manager'],
+    name: '信息列表'
+  },
+  component: ()=>import('./src/infoIndex.vue')
+]
+```
+
+#### 属性
+- include: 字符串或正则表达式，只有名称匹配的组件被缓存
+- exclude: 字符串或正则表达式，名称匹配的组件不会被缓存
+- max: 数字，最多可以缓存多少组件实例
+
+#### 生命周期
+- onActivated: 进入页面
+- onDeactivated: 离开页面
+- 顺序: created -> mounted -> activated
+
+```javascript
+onActivated(()=> {
+  console.log('onActivated')
+})
+onDeactivated(()=>{
+  ...
+})
+```
+### 404页面处理
+- 所有用户都会有的，所以放在默认路由里面
+```javascript
+export const defaultRouterMap = [
+  // 404页面
+  {
+    path: '/page404'
+    meta: {
+      name: '404',
+      icon: '404'
+    },
+    component: Layout,
+    children: [
+      {
+        path: '/404',
+        meta: {
+          name: '404'
+        },
+        component: import('../views/404.vue')
+      }
+    ]
+  }
+  // 当匹配不到上面的路由，就会走 404 页面
+  // 404 一般放在最后面，因为这里匹配所有的路由，需要先找前面的路由
+  {
+    path: '*',
+    redirect: '/404',
+    hidden: true
+  }
+]
+```
+### nginx配置、日志查看、proxy_pass指向配置、域名解析访问项目
+- 测试生产环境配置，在配置文件中写固定的请求接口
+```conf
+# .env_development
+VUE_APP_API = /devApi
+# .env_production
+VUE_APP_API = /productionApi
+```
+- 修改 request.js 文件中的内容
+```javascript
+const BASEURL = process.env.NODE_ENV === 'production' ? process.env.VUE_APP_API : process.env.VUE_APP_API
+const service = axios.create({
+  baseURL: BASEURL,  // http://192.168.0.106:8080/devApi === http://www.web-jshtml.cn/productapi/productapi
+  timeout: 15000,    // 超时
+})
+```
+- 修改 vue.config.js 文件中的内容
+```javascript
+devServer: {
+  proxy: {
+    process.env.VUE_APP_API: {
+      target: 'http://www-jshtml.cn/productapi/token',
+      changeOrigin: true,
+      pathRewrite: {
+        '^/process.env.VUE_APP_API': ''
+      }
+    }
+  }
+}
+```
+- nginx 配置
+```conf
+include /etc/nginx/conf.d/*.conf;
+server {
+  listen       80 default_server;
+
+  location /productapi/ {
+    proxy_pass  http://www.web-jshtml.cn/productapi/token/;    // 本地配置的proxy就没有作用的
+  }
+  location /api/ {
+    root   /root/;
+    index   index.html  index.htm;
+  }
+}
+```
+
+
+### proxy_pass 配置中url末尾带 / 时
+- nginx转发时，会将原 url 去除location匹配表达式 后的内容拼接在 proxy_pass 中 url之后
+
+- 测试地址：http://www-web-jshtml.cn/productapi/getSms/
+#### 场景1: 
+```
+location ^~ /productapi/ {      
+  proxy_pass  http://www.web-jshtml.cn/productapi/;
+}
+```
+- 代理后实际访问地址：http://www.web-jshtml.cn/productapi/getSms/;
+#### 场景2: 
+```
+location ^~ /productapi {      
+  proxy_pass  http://www.web-jshtml.cn/productapi/;
+}
+```
+- 代理后实际访问地址：http://www.web-jshtml.cn/productapi//getSms/;
+#### 场景3: 
+```
+location ^~ /productapi/ {      
+  proxy_pass  http://www.web-jshtml.cn/;
+}
+```
+- 代理后实际访问地址：http://www.web-jshtml.cn/getSms/;
+#### 场景4: 
+```
+location ^~ /productapi {      // 将 /productapi后面的拿去拼接，所以多了一个反斜线
+  proxy_pass  http://www.web-jshtml.cn/;
+}
+```
+- 代理后实际访问地址：http://www.web-jshtml.cn//getSms/;
+
+#### 场景2: proxy_pass 配置中url末尾不带 / 时
+- 如 url 中不包含 path，且包含相同结尾，则直接将原 url 拼接在 proxy_pass中 url之后
+```
+location ^~ /productapi/ {     // 这里匹配的是上面测试地址的  getSms/,然后拼接在下面的地址后面
+  proxy_pass http://www.web-jshtml.cn/productapi/;
+}
+```
+- 如 url 中不包含 path，且不包含相同结尾，则直接将原 url 拼接在 proxy_pass中 url之后
+```
+location ^~ /productapi/ {     // 这里匹配的是上面测试地址的  getSms/,然后拼接在下面的地址后面
+  proxy_pass http://www.web-jshtml.cn/productgetSms/;
+}
+```
+- 如 url 中包含path，则将原 url 去除location匹配表达式后的内容拼接在 proxy_pass中的 url之后
+```
+location ^~ /productapi {     // 这里匹配的是上面测试地址的  getSms/,然后拼接在下面的地址后面
+  proxy_pass http://www.web-jshtml.cn/productgetSms/;
+}
+```
+- 具体例子
+```conf
+server {
+  listen      80 default_server;
+  location /productapi/ {
+    # productapi/getSms
+    proxy_pass  http://www.web-jshtml.cn/productapi/token/$url  # 将上面 productapi/ 后面的 getSms 替换 这里的 $url
+  }
+}
+```
+## 域名、云服务器/虚拟主机、云数据库（服务地址、账号、密码）
+- 虚拟主机自带云数据库
+- 云服务器和云数据库是分开的
+- 个人玩的话，虚拟主机够用
